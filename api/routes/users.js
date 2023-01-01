@@ -58,7 +58,7 @@ router.post('/signup', (req, res, next) => {
                     message: "Email already exists"
                 })
             } else {
-                bcript.hash(req.body.email, 10, (err, hash) => {
+                bcript.hash(req.body.password, 10, (err, hash) => {
                     if (err) {
                         res.status(500).json({
                             error:err
@@ -98,44 +98,33 @@ router.post('/login', (req, res, next) => {
     User.find({email: req.body.email})
         .exec()
         .then(user => {
-            if (user.length >= 1) {
-                return res.status(409).json({
-                    message: "Email already exists"
-                })
-            } else {
-                bcript.hash(req.body.email, 10, (err, hash) => {
-                    if (err) {
-                        res.status(500).json({
-                            error:err
-                        })
-                    } else {
-                        const user = new User({
-                            _id: new mongoose.Types.ObjectId(),
-                            username: req.body.username,
-                            firstName: req.body.firstName,
-                            lastName: req.body.lastName,
-                            email: req.body.email,
-                            address: req.body.address,
-                            dob: req.body.dob,
-                            country: req.body.country,
-                            password: hash,
-                            phoneNumber: req.body.phoneNumber,
-
-                        })
-                        user
-                            .save()
-                            .then(result => {
-                                res.status(201).json({
-                                    message: "user created."
-                                })
-                            })
-                            .catch( err => {
-                                console.log(err);
-                                res.status(500).json({error: err})
-                            })
-                    }
+            if (user.length < 1) {
+                return res.status(401).json({
+                    message: "Mail not found, user doesn't exist"
                 })
             }
+            bcript.compare(req.body.password, user[0].password, (err, result) => {
+                if (err) {
+                    return res.status(401).json({
+                        message: "Auth failed"
+                    })
+                }
+                if (result) {
+                    res.status(200).json({
+                        message: "Auth successful"
+                    })
+                } else {
+                    res.status(401).json({
+                        message: "Auth failed"
+                    })
+                }
+
+
+
+            })
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
         })
 });
 
