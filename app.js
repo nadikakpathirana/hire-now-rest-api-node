@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 
 const ProductRoutes = require('./api/routes/products');
 const OrderRoutes = require('./api/routes/orders');
-const UserRouters = require('./api/routes/users')
-// const CommonRouters = require('./api/routes/common')
+const UserRouters = require('./api/routes/users');
+const ServiceRouters = require('./api/routes/services');
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
@@ -48,7 +48,7 @@ mongoose.Promise = global.Promise;
 app.use('/api/products', ProductRoutes);
 app.use('/api/orders', OrderRoutes);
 app.use('/api/users', UserRouters);
-// app.use('/api/', CommonRouters);
+app.use('/api/services', ServiceRouters);
 
 //default url
 app.use((req, res, next) => {
