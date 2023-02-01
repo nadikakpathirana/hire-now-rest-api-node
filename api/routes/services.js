@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 
+const authUser = require("../middleware/auth-user")
+
 
 const Service = require('../models/service');
 
@@ -66,14 +68,14 @@ router.get('/:serviceID', (req, res, next) => {
         })
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', authUser, (req, res, next) => {
     const service = new Service({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
         title: req.body.title,
         description: req.body.description,
         category: req.body.category,
-        provider: req.body.title,
+        provider: req.body.provider,
     })
 
     service.save()
@@ -102,7 +104,7 @@ router.post('/', (req, res, next) => {
 
 
 
-router.patch('/:serviceID', (req, res, next) => {
+router.patch('/:serviceID', authUser, (req, res, next) => {
     const id = req.params.serviceID;
     const updateOps = {};
 

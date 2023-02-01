@@ -4,10 +4,11 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const ProductRoutes = require('./api/routes/products');
-const OrderRoutes = require('./api/routes/orders');
 const UserRouters = require('./api/routes/users');
+const CategoryRouters = require('./api/routes/category');
 const ServiceRouters = require('./api/routes/services');
+const OrderRoutes = require('./api/routes/orders');
+
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
@@ -45,10 +46,10 @@ mongoose.connect(
 mongoose.Promise = global.Promise;
 
 
-app.use('/api/products', ProductRoutes);
-app.use('/api/orders', OrderRoutes);
 app.use('/api/users', UserRouters);
+app.use('/api/categories', CategoryRouters);
 app.use('/api/services', ServiceRouters);
+app.use('/api/orders', OrderRoutes);
 
 //default url
 app.use((req, res, next) => {
