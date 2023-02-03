@@ -21,6 +21,6 @@ router.post('/', authUser, OrderController.create_a_order);
 router.patch('/:orderID', authUser, OrderController.patch_a_order);
 
 // delete a order
-router.delete('/:orderID', OrderController.patch_a_order);
+router.delete('/:orderID', OrderController.remove_a_order);
 
 module.exports = router;
