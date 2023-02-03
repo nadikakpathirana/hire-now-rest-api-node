@@ -8,7 +8,8 @@ const UserRouters = require('./api/routes/users');
 const CategoryRouters = require('./api/routes/category');
 const ServiceRouters = require('./api/routes/services');
 const OrderRoutes = require('./api/routes/orders');
-const MessageRoutes = require("./api/routes/message")
+const MessageRoutes = require("./api/routes/message");
+const FavouriteRoutes = require("./api/routes/favourite-routes");
 
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
@@ -51,6 +52,7 @@ app.use('/api/categories', CategoryRouters);
 app.use('/api/services', ServiceRouters);
 app.use('/api/orders', OrderRoutes);
 app.use('/api/messages', MessageRoutes);
+app.use('/api/favourites', FavouriteRoutes);
 
 //default url
 app.use((req, res, next) => {

@@ -153,7 +153,7 @@ exports.patch_a_order = (req, res, next) => {
         })
 }
 
-exports.patch_a_order = (req, res, next) => {
+exports.remove_a_order = (req, res, next) => {
     const id = req.params.orderID;
     Order.remove({_id:id})
         .exec()
