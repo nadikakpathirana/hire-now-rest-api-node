@@ -11,7 +11,7 @@ exports.get_all_category = (req, res, next) => {
                     categories: docs.map( doc => {
                         return {
                             name: doc.name,
-                            categoryImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
+                            categoryImg: doc.image,
                             _id: doc._id,
                         }
                     })
@@ -49,7 +49,6 @@ exports.get_specific_category = (req, res, next) => {
 }
 
 exports.create_category = (req, res, next) => {
-    console.log(req.file);
     const category = new Category({
         _id: new mongoose.Types.ObjectId(),
         name: req.body.name,
@@ -61,7 +60,9 @@ exports.create_category = (req, res, next) => {
             res.status(201).json({
                 message: "category_created",
                 createdCategory: {
-                    name: result.name
+                    name: result.name,
+                    image: result.image,
+                    id: result._id
                 }
             })
         })

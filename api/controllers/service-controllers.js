@@ -147,13 +147,15 @@ exports.get_specific_service = (req, res, next) => {
                         service: {
                             title: doc.title,
                             serviceImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5o1JEx5HkuIza83FgPMcXYA5aylxAwGXGyA&usqp=CAU",
-                            rating: 3,
+                            // description: doc.description,
+                            description: " abouteuaglie ileh lweigieakgloi gdali weli",
                             _id: doc.provider.username
                         },
                         seller: {
                             _id: doc.provider._id,
                             name: doc.provider.username,
                             proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
+                            rating: 3,
                         },
                     }
                 });
@@ -176,6 +178,7 @@ exports.create_a_service = (req, res, next) => {
         description: req.body.description,
         category: req.body.category,
         provider: req.body.provider,
+        serviceImg: req.file.path
     })
 
     service.save()

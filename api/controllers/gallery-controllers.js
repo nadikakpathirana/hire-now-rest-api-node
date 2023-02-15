@@ -16,10 +16,9 @@ exports.get_all_of_seller = (req, res, next) => {
                         if (docs.length > 0) {
                             const response = {
                                 count: docs.length,
-                                categories: docs.map( doc => {
+                                images: docs.map( doc => {
                                     return {
                                         img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                                        username: doc.provider.username,
                                         _id: doc._id,
                                     }
                                 })
