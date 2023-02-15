@@ -11,8 +11,10 @@ const OrderRoutes = require('./api/routes/orders');
 const MessageRoutes = require("./api/routes/message");
 const FavouriteRoutes = require("./api/routes/favourite-routes");
 const PackageRoutes = require("./api/routes/package-router");
+const GalleryRoutes = require("./api/routes/gallery-routes");
 
 app.use(morgan('dev'));
+app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
@@ -55,6 +57,7 @@ app.use('/api/orders', OrderRoutes);
 app.use('/api/messages', MessageRoutes);
 app.use('/api/favourites', FavouriteRoutes);
 app.use('/api/packages', PackageRoutes);
+app.use('/api/gallery', GalleryRoutes);
 
 //default url
 app.use((req, res, next) => {
