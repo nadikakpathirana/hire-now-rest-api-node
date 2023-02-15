@@ -11,6 +11,7 @@ exports.get_all_category = (req, res, next) => {
                     categories: docs.map( doc => {
                         return {
                             name: doc.name,
+                            categoryImg: doc.image,
                             _id: doc._id,
                         }
                     })
@@ -50,7 +51,8 @@ exports.get_specific_category = (req, res, next) => {
 exports.create_category = (req, res, next) => {
     const category = new Category({
         _id: new mongoose.Types.ObjectId(),
-        name: req.body.name
+        name: req.body.name,
+        image: req.file.path
     })
 
     category.save()
@@ -58,7 +60,9 @@ exports.create_category = (req, res, next) => {
             res.status(201).json({
                 message: "category_created",
                 createdCategory: {
-                    name: result.name
+                    name: result.name,
+                    image: result.image,
+                    id: result._id
                 }
             })
         })

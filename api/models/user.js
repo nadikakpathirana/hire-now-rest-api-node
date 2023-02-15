@@ -6,11 +6,12 @@ const userSchema = mongoose.Schema({
     firstName: { type: String, required: true},
     lastName: { type: String, required: true},
     email: { type: String, required: true, unique: true},
-    address: { type: String, required: true},
-    dob: { type: String, required: true},
-    country: { type: String, required: true},
+    address: { type: String, required: false},
+    dob: { type: String, required: false},
+    proPic: {type: String, required: false},
+    country: { type: String, required: false},
     password: { type: String, required: true},
-    phoneNumber: { type: String, required: true},
+    phoneNumber: { type: String, required: false},
     userType: { type: String, default: "buyer", required: false},
     isSellerActivated: {type: Boolean, default: false, required: false}
 })
