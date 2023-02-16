@@ -5,6 +5,13 @@ const jwt = require("jsonwebtoken");
 
 const Service = require('../models/service');
 
+function calculate_age(dob) {
+    var diff_ms = Date.now() - dob.getTime();
+    var age_dt = new Date(diff_ms);
+
+    return Math.abs(age_dt.getUTCFullYear() - 1970);
+}
+
 exports.get_all_users = (req, res, next) => {
     User.find()
         // .select("name price _id")
@@ -22,16 +29,11 @@ exports.get_all_users = (req, res, next) => {
                             email: doc.email,
                             address: doc.address,
                             dob: doc.dob,
+                            // age: calculate_age(doc.dob),
                             proPic: doc.proPic,
-                            country: doc.country,
                             password: doc.password,
                             phoneNumber: doc.phoneNumber,
                             userType: doc.userType,
-
-                            // request: {
-                            //     type: 'GET',
-                            //     url: 'http://localhost:3000/products/' + doc._id
-                            // }
                         }
                     })
                 }
@@ -67,8 +69,6 @@ exports.get_user_counts = (req, res, next) => {
                             .exec()
                             .then(docs => {
                                 count.services = docs.length;
-                                console.log(docs.length);
-                                console.log(count);
                                 res.status(200).json({status: count});
                             })
                     })
@@ -223,6 +223,7 @@ exports.get_user_info = (req, res, next) => {
                     email: doc.email,
                     address: doc.address,
                     dob: doc.dob,
+                    // age: calculate_age(doc.dob),
                     proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
                     phoneNumber: doc.phoneNumber,
                     userType: doc.userType,
@@ -259,7 +260,11 @@ exports.check_is_valid_token = (req, res, next) => {
                     email: doc.email,
                     address: doc.address,
                     dob: doc.dob,
-                    country: doc.country,
+                    proPic: doc.proPic,
+                    about: doc.about,
+                    job: doc.job,
+                    location: doc.location,
+                    availability: doc.availability,
                     phoneNumber: doc.phoneNumber,
                     userType: doc.userType,
                     isSellerActivated: doc.isSellerActivated
@@ -278,18 +283,69 @@ exports.update_user_info = (req, res, next) => {
     const id = req.params.userID;
     const updateOps = {};
 
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
+    // normal user
+    if(req.body.firstName){
+        updateOps["firstName"] = req.body.firstName;
+    }
+    if(req.body.lastName){
+        updateOps["lastName"] = req.body.lastName;
+    }
+    if(req.body.mobileNumber){
+        updateOps["phoneNumber"] = req.body.mobileNumber;
+    }
+    if(req.body.address){
+        updateOps["address"] = req.body.address;
     }
 
-    User.update({_id:id}, {$set: updateOps})
+    // seller data
+    if(req.body.job){
+        updateOps["job"] = req.body.job;
+    }
+    if(req.body.dob){
+        updateOps["dob"] = req.body.dob;
+    }
+    if(req.body.location){
+        updateOps["location"] = req.body.location;
+    }
+    if(req.body.availability){
+        updateOps["availability"] = req.body.availability;
+    }
+    if(req.body.about){
+        updateOps["about"] = req.body.about;
+    }
+
+    // profile pic
+    if(req.file){
+        if(req.file.path){
+            updateOps["proPic"] = req.file.path;
+        }
+    }
+
+    if(req.body.isSellerActivated){
+        updateOps["isSellerActivated"] = req.body.isSellerActivated;
+    }
+
+    User.updateOne({username:id}, {$set: updateOps})
         .exec()
         .then(result => {
             res.status(200).json({
                 message: "user updated",
-                request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/users/' + id
+                user: {
+                    _id: result._id,
+                    username:result.username,
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    email: result.email,
+                    address: result.address,
+                    dob: result.dob,
+                    proPic: result.proPic,
+                    about: result.about,
+                    job: result.job,
+                    location: result.location,
+                    availability: result.availability,
+                    phoneNumber: result.phoneNumber,
+                    userType: result.userType,
+                    isSellerActivated: result.isSellerActivated
                 }
             });
         })
@@ -315,7 +371,6 @@ exports.remove_a_user = (req, res, next) => {
                         email: 'String',
                         address: 'String',
                         dob: 'String',
-                        country: 'String',
                         password: 'String',
                         phoneNumber: 'String'
                     }

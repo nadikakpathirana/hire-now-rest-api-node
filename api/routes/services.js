@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const fs = require('fs');
 
-const authUser = require("../middleware/auth-user")
+// const authUser = require("../middleware/auth-user")
 
 const ServiceController = require("../controllers/service-controllers");
 
@@ -12,8 +12,8 @@ const ServiceController = require("../controllers/service-controllers");
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        fs.mkdir('./uploads/images/users/',(err)=>{
-            cb(null, './uploads/images/users/');
+        fs.mkdir('./uploads/images/services/',(err)=>{
+            cb(null, './uploads/images/services/');
         });
     },
     filename: function(req, file, cb) {
@@ -54,10 +54,10 @@ router.get('/popular', ServiceController.get_popular_services);
 router.get('/:serviceID', ServiceController.get_specific_service);
 
 // create a service
-router.post('/', authUser, upload.single('serviceImg'), ServiceController.create_a_service);
+router.post('/', upload.single('serviceImg'),  ServiceController.create_a_service);
 
 // update a service
-router.patch('/:serviceID', authUser, ServiceController.update_a_service);
+router.patch('/:serviceID', upload.single('serviceImg'), ServiceController.update_a_service);
 
 // remove a service
 router.delete('/:serviceID', ServiceController.remove_a_service);

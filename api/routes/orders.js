@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const authUser = require("../middleware/auth-user");
+// const authUser = require("../middleware/auth-user");
 
 const OrderController = require("../controllers/order-controllers");
 
@@ -15,10 +15,10 @@ router.get('/buyer-orders/:buyerID', OrderController.get_orders_of_a_buyer);
 router.get('/:orderID', OrderController.get_specific_order);
 
 // create a order
-router.post('/', authUser, OrderController.create_a_order);
+router.post('/', OrderController.create_a_order);
 
 // update a order
-router.patch('/:orderID', authUser, OrderController.patch_a_order);
+router.patch('/:orderID', OrderController.patch_a_order);
 
 // delete a order
 router.delete('/:orderID', OrderController.remove_a_order);

@@ -18,7 +18,7 @@ exports.get_all_services = (req, res, next) => {
                             name: doc.name,
                             title: doc.title,
                             description: doc.description,
-                            category: doc.category,
+                            // category: doc.category,
                             provider: doc.provider,
                             _id: doc._id,
                             request: {
@@ -43,7 +43,7 @@ exports.get_all_services = (req, res, next) => {
 
 exports.get_all_services_of_a_seller = (req, res, next) => {
     const id = req.params.sellerID;
-    Service.find({username: id})
+    Service.find({provider: id})
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -52,7 +52,7 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
                     services: docs.map( doc => {
                         return {
                             title: doc.title,
-                            serviceImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5o1JEx5HkuIza83FgPMcXYA5aylxAwGXGyA&usqp=CAU",
+                            serviceImg: doc.serviceImg,
                             _id: doc._id
                         }
                     })
@@ -154,7 +154,7 @@ exports.get_specific_service = (req, res, next) => {
                         seller: {
                             _id: doc.provider._id,
                             name: doc.provider.username,
-                            proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
+                            proPic: doc.proPic,
                             rating: 3,
                         },
                     }
@@ -173,10 +173,9 @@ exports.get_specific_service = (req, res, next) => {
 exports.create_a_service = (req, res, next) => {
     const service = new Service({
         _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
         title: req.body.title,
         description: req.body.description,
-        category: req.body.category,
+        // category: req.body.category,
         provider: req.body.provider,
         serviceImg: req.file.path
     })
@@ -209,8 +208,23 @@ exports.update_a_service = (req, res, next) => {
     const id = req.params.serviceID;
     const updateOps = {};
 
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
+    if(req.body.title){
+        updateOps["title"] = req.body.title;
+    }
+
+    // if(req.body.category){
+    //     updateOps["category"] = req.body.category;
+    // }
+
+    if(req.body.description){
+        updateOps["description"] = req.body.description;
+    }
+
+    // service image
+    if(req.file){
+        if(req.file.path){
+            updateOps["serviceImg"] = req.file.path;
+        }
     }
 
     Service.update({_id:id}, {$set: updateOps})
