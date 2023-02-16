@@ -79,14 +79,14 @@ exports.get_suggested_services = (req, res, next) => {
                     count: docs.length,
                     services: docs.map( doc => {
                         return {
-                            name: `${doc.provider.firstName} ${doc.provider.lastName}`,
-                            title: doc.title,
-                            // description: doc.description,
-                            serviceImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5o1JEx5HkuIza83FgPMcXYA5aylxAwGXGyA&usqp=CAU",
-                            proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                            // category: doc.category,
-                            // provider: doc.provider,
                             _id: doc._id,
+                            title: doc.title,
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rating: 3,
                         }
                     })
                 }
@@ -113,14 +113,14 @@ exports.get_popular_services = (req, res, next) => {
                     count: docs.length,
                     services: docs.map( doc => {
                         return {
-                            name: `${doc.provider.firstName} ${doc.provider.lastName}`,
-                            title: doc.title,
-                            // description: doc.description,
-                            serviceImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5o1JEx5HkuIza83FgPMcXYA5aylxAwGXGyA&usqp=CAU",
-                            proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                            // category: doc.category,
-                            // provider: doc.provider,
                             _id: doc._id,
+                            title: doc.title,
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rating: 3,
                         }
                     })
                 }
@@ -146,15 +146,14 @@ exports.get_specific_service = (req, res, next) => {
                     service: {
                         service: {
                             title: doc.title,
-                            serviceImg: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5o1JEx5HkuIza83FgPMcXYA5aylxAwGXGyA&usqp=CAU",
-                            // description: doc.description,
-                            description: " abouteuaglie ileh lweigieakgloi gdali weli",
-                            _id: doc.provider.username
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            _id: doc._id
                         },
                         seller: {
                             _id: doc.provider._id,
                             name: doc.provider.username,
-                            proPic: doc.proPic,
+                            proPic: doc.provider.proPic,
                             rating: 3,
                         },
                     }
@@ -227,7 +226,7 @@ exports.update_a_service = (req, res, next) => {
         }
     }
 
-    Service.update({_id:id}, {$set: updateOps})
+    Service.updateOne({_id:id}, {$set: updateOps})
         .exec()
         .then(result => {
             res.status(200).json({
@@ -239,6 +238,7 @@ exports.update_a_service = (req, res, next) => {
             });
         })
         .catch(err => {
+            console.log(err);
             res.status(500).json({error: err});
         })
 }
@@ -249,18 +249,7 @@ exports.remove_a_service = (req, res, next) => {
         .exec()
         .then(result => {
             res.status(200).json({
-                message: "service_deleted",
-                request: {
-                    type: 'POST',
-                    url: 'http://localhost:3000/services/',
-                    body: {
-                        name: 'String',
-                        title: 'String',
-                        description: 'String',
-                        category: 'String',
-                        provider: 'String'
-                    }
-                }
+                message: "service_deleted"
             });
         })
         .catch(err => {
