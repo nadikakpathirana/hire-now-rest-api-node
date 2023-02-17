@@ -4,10 +4,83 @@ const multer = require('multer');
 
 
 const utils = require('./utils');
+const User = require("../models/user");
 
 
 exports.get_all_services = (req, res, next) => {
-    Service.find()
+    Service.find().populate('provider')
+        .exec()
+        .then(docs => {
+            if (docs.length > 0) {
+                const response = {
+                    count: docs.length,
+                    services: docs.map( doc => {
+                        return {
+                            _id: doc._id,
+                            title: doc.title,
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rating: 3,
+                        }
+                    })
+                }
+                res.status(200).json(response);
+            } else {
+                res.status(404).json({error: 'service_empty'});
+            }
+
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+}
+
+exports.search_services = (req, res, next) => {
+    const searchKey = req.params.searchKey;
+    var regex = new RegExp("^" + searchKey);
+    console.log(regex);
+    Service.find({title: {$regex : regex}})
+        .exec()
+        .then(docs => {
+            if (docs.length > 0) {
+                const response = {
+                    count: docs.length,
+                    services: docs.map( doc => {
+                        return {
+                            name: doc.name,
+                            title: doc.title,
+                            description: doc.description,
+                            category: doc.category,
+                            provider: doc.provider,
+                            _id: doc._id,
+                            request: {
+                                type: 'GET',
+                                url: 'http://localhost:3000/service/' + doc._id
+                            }
+                        }
+                    })
+                }
+                res.status(200).json(response);
+            } else {
+                res.status(404).json({error: 'service_empty'});
+            }
+
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+}
+
+exports.get_all_services_of_a_category = (req, res, next) => {
+    const id = req.params.categoryID;
+    Service.find({category:id})
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -43,29 +116,42 @@ exports.get_all_services = (req, res, next) => {
 
 exports.get_all_services_of_a_seller = (req, res, next) => {
     const id = req.params.sellerID;
-    Service.find({provider: id})
+    User.findOne({username: id})
         .exec()
-        .then(docs => {
-            if (docs.length > 0) {
-                const response = {
-                    count: docs.length,
-                    services: docs.map( doc => {
-                        return {
-                            title: doc.title,
-                            serviceImg: doc.serviceImg,
-                            _id: doc._id
+        .then(result => {
+            if (result) {
+                Service.find({provider: result._id})
+                    .exec()
+                    .then(docs => {
+                        console.log(docs);
+                        if (docs.length > 0) {
+                            const response = {
+                                count: docs.length,
+                                services: docs.map( doc => {
+                                    return {
+                                        title: doc.title,
+                                        serviceImg: doc.serviceImg,
+                                        _id: doc._id
+                                    }
+                                })
+                            }
+                            res.status(200).json(response);
+                        } else {
+                            res.status(404).json({error: 'service_empty'});
                         }
                     })
-                }
-                res.status(200).json(response);
+                    .catch(err => {
+                        res.status(500).json({
+                            error: err
+                        })
+                    })
             } else {
-                res.status(404).json({error: 'service_empty'});
+                res.status(200).json({message: 'not valid entry for that id'})
             }
         })
         .catch(err => {
-            res.status(500).json({
-                error: err
-            })
+            console.log(err);
+            res.status(500).json({error:err})
         })
 }
 
@@ -74,7 +160,7 @@ exports.get_suggested_services = (req, res, next) => {
         .exec()
         .then(docs => {
             if (docs.length > 0) {
-                docs = utils.getMultipleRandom(docs, 10)
+                docs = utils.getMultipleRandom(docs, 12)
                 const response = {
                     count: docs.length,
                     services: docs.map( doc => {
@@ -108,7 +194,7 @@ exports.get_popular_services = (req, res, next) => {
         .exec()
         .then(docs => {
             if (docs.length > 0) {
-                docs = utils.getMultipleRandom(docs, 10)
+                docs = utils.getMultipleRandom(docs, 12)
                 const response = {
                     count: docs.length,
                     services: docs.map( doc => {

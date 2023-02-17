@@ -41,6 +41,13 @@ const upload = multer({
 // get all services
 router.get('/', ServiceController.get_all_services);
 
+// get all services
+router.get('/search/:searchKey', ServiceController.search_services);
+
+
+// get all services
+router.get('/category/:categoryID', ServiceController.get_all_services_of_a_category);
+
 // get all services of a seller
 router.get('/seller-services/:sellerID', ServiceController.get_all_services_of_a_seller);
 

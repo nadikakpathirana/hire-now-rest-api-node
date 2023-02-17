@@ -82,7 +82,7 @@ exports.get_user_counts = (req, res, next) => {
 }
 
 exports.get_sellers = (req, res, next) => {
-    User.find({userType: "buyer"})
+    User.find({userType: "seller"})
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -92,32 +92,38 @@ exports.get_sellers = (req, res, next) => {
                         return {
                             _id: doc._id,
                             username:doc.username,
-                            proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                            rating: 4,
-                            description: "descriptiondescriptiondescription vdescription description description"
+                            proPic:doc.proPic,
+                            about:doc.about,
+                            rating: 4.5,
                         }
                     })
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'user_empty'});
+                res.status(200).json({error: 'user_empty'});
             }
 
         })
         .catch(err => {
-            res.status(500).json({
+            console.log(err);
+                res.status(500).json({
                 error: err
             })
         });
 }
 
 exports.register_new_user = (req, res, next) => {
-    User.find({email: req.body.email})
+    User.find({
+        $or: [
+            {email: req.body.email},
+            {username: req.body.username}
+        ]
+    })
         .exec()
         .then(user => {
             if (user.length >= 1) {
-                return res.status(409).json({
-                    message: "Email already exists"
+                return res.status(200).json({
+                    status: false
                 })
             } else {
                 bcript.hash(req.body.password, 10, (err, hash) => {
@@ -159,7 +165,7 @@ exports.register_new_user = (req, res, next) => {
 }
 
 exports.get_user_token = (req, res, next) => {
-    User.find({email: req.body.email})
+    User.find({username: req.body.email})
         .exec()
         .then(user => {
             if (user.length < 1) {
@@ -209,12 +215,10 @@ exports.get_user_token = (req, res, next) => {
 
 exports.get_user_info = (req, res, next) => {
     const id = req.params.userID;
-    User.find({username: id})
-        // .select("name price _id")
+    User.findOne({username: id})
         .exec()
         .then(doc => {
             if (doc) {
-                doc = doc[0];
                 res.status(200).json({
                     _id: doc._id,
                     username:doc.username,
@@ -224,17 +228,17 @@ exports.get_user_info = (req, res, next) => {
                     address: doc.address,
                     dob: doc.dob,
                     // age: calculate_age(doc.dob),
-                    proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
+                    proPic: doc.proPic,
                     phoneNumber: doc.phoneNumber,
                     userType: doc.userType,
-                    city: "Nagaraya",
-                    availability: "Full time",
-                    job: "Any",
+                    city: doc.location,
+                    availability: doc.availability,
+                    job: doc.job,
                     rating: 7,
-                    about: "halidi auia adjgaoiygfahf audgfaufditpawefha uawfouaiflajdhfduiaf ewgoauwefaweouif wae9ufewufawuf "
+                    about: doc.about
                 });
             } else {
-                res.status(404).json({message: 'not valid entry for that id'})
+                res.status(200).json({message: 'not valid entry for that id'})
             }
         })
         .catch(err => {
@@ -254,6 +258,7 @@ exports.check_is_valid_token = (req, res, next) => {
                 doc = doc[0]
                 res.status(200).json({
                     _id: doc._id,
+                    status: true,
                     username:doc.username,
                     firstName: doc.firstName,
                     lastName: doc.lastName,

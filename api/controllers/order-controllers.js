@@ -27,7 +27,7 @@ exports.get_orders_of_a_seller = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -40,8 +40,7 @@ exports.get_orders_of_a_seller = (req, res, next) => {
 
 exports.get_pending_orders_of_a_seller = (req, res, next) => {
     const sellerID = req.params.sellerID;
-    console.log("called");
-    Order.find({seller: sellerID, status: "pending"})
+    Order.find({seller: sellerID, status: "pending"}).populate('service').populate('buyer')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -49,9 +48,10 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
-                            buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            name: doc.buyer.username,
+                            proPic: doc.buyer.proPic,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -60,11 +60,12 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
         .catch(err => {
+            console.log(err, "error");
             res.status(500).json({
                 error: err
             })
@@ -73,7 +74,7 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
 
 exports.get_active_orders_of_a_seller = (req, res, next) => {
     const sellerID = req.params.sellerID;
-    Order.find({seller: sellerID, status: "active"})
+    Order.find({seller: sellerID, status: "active"}).populate('service').populate('buyer')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -81,9 +82,11 @@ exports.get_active_orders_of_a_seller = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
-                            buyer: doc.buyer,
+                            name: doc.buyer.username,
+                            proPic: doc.buyer.proPic,
                             seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -92,7 +95,7 @@ exports.get_active_orders_of_a_seller = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -105,7 +108,7 @@ exports.get_active_orders_of_a_seller = (req, res, next) => {
 
 exports.get_completed_orders_of_a_seller = (req, res, next) => {
     const sellerID = req.params.sellerID;
-    Order.find({seller: sellerID, status: "completed"})
+    Order.find({seller: sellerID, status: "completed"}).populate('service').populate('buyer')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -113,9 +116,11 @@ exports.get_completed_orders_of_a_seller = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
-                            buyer: doc.buyer,
+                            name: doc.buyer.username,
+                            proPic: doc.buyer.proPic,
                             seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -124,7 +129,7 @@ exports.get_completed_orders_of_a_seller = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -137,7 +142,7 @@ exports.get_completed_orders_of_a_seller = (req, res, next) => {
 
 exports.get_orders_of_a_buyer = (req, res, next) => {
     const buyerID = req.params.buyerID;
-    Order.find({"buyer": buyerID})
+    Order.find({"buyer": buyerID}).populate('service').populate('seller')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -145,9 +150,11 @@ exports.get_orders_of_a_buyer = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
+                            name: doc.seller.username,
+                            proPic: doc.seller.proPic,
                             buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -156,7 +163,7 @@ exports.get_orders_of_a_buyer = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -169,7 +176,7 @@ exports.get_orders_of_a_buyer = (req, res, next) => {
 
 exports.get_pending_orders_of_a_buyer = (req, res, next) => {
     const buyerID = req.params.buyerID;
-    Order.find({buyer: buyerID, status: "pending"})
+    Order.find({buyer: buyerID, status: "pending"}).populate('service').populate('seller')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -177,9 +184,11 @@ exports.get_pending_orders_of_a_buyer = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
+                            name: doc.seller.username,
+                            proPic: doc.seller.proPic,
                             buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -188,7 +197,7 @@ exports.get_pending_orders_of_a_buyer = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -202,7 +211,23 @@ exports.get_pending_orders_of_a_buyer = (req, res, next) => {
 
 exports.get_active_orders_of_a_buyer = (req, res, next) => {
     const buyerID = req.params.buyerID;
-    Order.find({buyer: buyerID, status: "active"})
+    // Order.find({buyer: buyerID, {$or: {[{status: "active"},{status: "completed"}]}} , paid: false})
+    Order.find({
+        $and: [
+            {
+                buyer: buyerID
+            },
+            {
+                $or: [
+                    {status: "active"},
+                    {status: "completed"}
+                ]
+            },
+            {
+                paid: false
+            }
+        ]
+    }).populate('service').populate('seller')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -210,9 +235,11 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
+                            name: doc.seller.username,
+                            proPic: doc.seller.proPic,
                             buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -221,7 +248,7 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
@@ -234,7 +261,7 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
 
 exports.get_completed_orders_of_a_buyer = (req, res, next) => {
     const buyerID = req.params.buyerID;
-    Order.find({buyer: buyerID, status: "completed"})
+    Order.find({buyer: buyerID, status: "completed", paid: true}).populate('service').populate('seller')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -242,9 +269,11 @@ exports.get_completed_orders_of_a_buyer = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
+                            name: doc.seller.username,
+                            proPic: doc.seller.proPic,
                             buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -253,7 +282,7 @@ exports.get_completed_orders_of_a_buyer = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'order_empty'});
+                res.status(200).json({error: 'order_empty'});
             }
 
         })
