@@ -12,7 +12,7 @@ const userSchema = mongoose.Schema({
     about: { type: String, required: false},
     job: { type: String, required: false},
     location: { type: String, required: false},
-    availability: { type: String, required: false},
+    availability: { type: String, default: "Full Time", required: false},
     password: { type: String, required: true},
     phoneNumber: { type: String, required: false},
     userType: { type: String, default: "buyer", required: false},

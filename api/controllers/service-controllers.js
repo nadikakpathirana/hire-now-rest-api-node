@@ -42,9 +42,8 @@ exports.get_all_services = (req, res, next) => {
 
 exports.search_services = (req, res, next) => {
     const searchKey = req.params.searchKey;
-    var regex = new RegExp("^" + searchKey);
-    console.log(regex);
-    Service.find({title: {$regex : regex}})
+    const regexPattern = new RegExp(`^${searchKey}`, 'i');
+    Service.find({title: regexPattern}).populate('provider')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -52,16 +51,14 @@ exports.search_services = (req, res, next) => {
                     count: docs.length,
                     services: docs.map( doc => {
                         return {
-                            name: doc.name,
-                            title: doc.title,
-                            description: doc.description,
-                            category: doc.category,
-                            provider: doc.provider,
                             _id: doc._id,
-                            request: {
-                                type: 'GET',
-                                url: 'http://localhost:3000/service/' + doc._id
-                            }
+                            title: doc.title,
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rating: 3,
                         }
                     })
                 }
@@ -93,11 +90,7 @@ exports.get_all_services_of_a_category = (req, res, next) => {
                             description: doc.description,
                             // category: doc.category,
                             provider: doc.provider,
-                            _id: doc._id,
-                            request: {
-                                type: 'GET',
-                                url: 'http://localhost:3000/service/' + doc._id
-                            }
+                            _id: doc._id
                         }
                     })
                 }
