@@ -41,13 +41,14 @@ app.use((req, res, next) => {
 
 
 // do this again
+mongoose.set('strictQuery', true);
 mongoose.connect(
     'mongodb+srv://admin:' +
     process.env.MONGO_ATLAS_PW +
     '@hire-now-cluster.ushzmvw.mongodb.net/?retryWrites=true&w=majority'
 )
-
 mongoose.Promise = global.Promise;
+
 
 
 app.use('/api/users', UserRouters);
