@@ -438,7 +438,7 @@ exports.update_user_info = (req, res, next) => {
         updateOps["isSellerActivated"] = req.body.isSellerActivated;
     }
 
-    User.updateOne({username:id}, {$set: updateOps})
+    User.findByIdAndUpdate({_id:id}, {$set: updateOps})
         .exec()
         .then(result => {
             res.status(200).json({
