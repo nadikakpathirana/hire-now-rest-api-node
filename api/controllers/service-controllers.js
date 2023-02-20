@@ -436,28 +436,29 @@ exports.update_a_service = (req, res, next) => {
         }
     }
 
-    Service.findByIdAndUpdate({_id:id}, {$set: updateOps})
+    Service.updateOne({_id:id}, {$set: updateOps})
         .exec()
         .then(doc => {
             res.status(200).json({
                 message: "service_updated",
-                service: {
-                    service: {
-                        title: doc.title,
-                        serviceImg: doc.serviceImg,
-                        description: doc.description,
-                        rateOfPayment: doc.rateOfPayment,
-                        price: doc.price,
-                        category: doc.category,
-                        _id: doc._id
-                    },
-                    seller: {
-                        _id: doc.provider._id,
-                        name: doc.provider.username,
-                        proPic: doc.provider.proPic,
-                        rating: 3,
-                    },
-                }
+                status: true
+                // service: {
+                //     service: {
+                //         title: doc.title,
+                //         serviceImg: doc.serviceImg,
+                //         description: doc.description,
+                //         rateOfPayment: doc.rateOfPayment,
+                //         price: doc.price,
+                //         category: doc.category,
+                //         _id: doc._id
+                //     },
+                //     seller: {
+                //         _id: doc.provider._id,
+                //         name: doc.provider.username,
+                //         proPic: doc.provider.proPic,
+                //         rating: 3,
+                //     },
+                // }
             });
         })
         .catch(err => {
