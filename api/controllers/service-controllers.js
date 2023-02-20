@@ -23,6 +23,9 @@ exports.get_all_services = (req, res, next) => {
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
                             rating: 3,
                         }
                     })
@@ -58,6 +61,9 @@ exports.search_services = (req, res, next) => {
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
                             rating: 3,
                         }
                     })
@@ -165,6 +171,9 @@ exports.get_suggested_services = (req, res, next) => {
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
                             rating: 3,
                         }
                     })
@@ -231,6 +240,9 @@ exports.get_suggested_services_with_id = (req, res, next) => {
                                     name: doc.provider.username,
                                     proPic: doc.provider.proPic,
                                     location: doc.provider.location,
+                                    rateOfPayment: doc.rateOfPayment,
+                                    price: doc.price,
+                                    category: doc.category,
                                     rating: 3,
                                 }
                             })
@@ -252,6 +264,9 @@ exports.get_suggested_services_with_id = (req, res, next) => {
                                                 name: doc.provider.username,
                                                 proPic: doc.provider.proPic,
                                                 location: doc.provider.location,
+                                                rateOfPayment: doc.rateOfPayment,
+                                                price: doc.price,
+                                                category: doc.category,
                                                 rating: 3,
                                             }
                                         })
@@ -300,6 +315,9 @@ exports.get_popular_services = (req, res, next) => {
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
                             rating: 3,
                         }
                     })
@@ -328,6 +346,9 @@ exports.get_specific_service = (req, res, next) => {
                             title: doc.title,
                             serviceImg: doc.serviceImg,
                             description: doc.description,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
                             _id: doc._id
                         },
                         seller: {
@@ -354,8 +375,10 @@ exports.create_a_service = (req, res, next) => {
         _id: new mongoose.Types.ObjectId(),
         title: req.body.title,
         description: req.body.description,
-        // category: req.body.category,
+        category: req.body.category,
         provider: req.body.provider,
+        rateOfPayment: req.body.rop,
+        price: req.body.price || 0,
         serviceImg: req.file.path
     })
 
@@ -369,11 +392,10 @@ exports.create_a_service = (req, res, next) => {
                     description: result.description,
                     category: result.category,
                     provider: result.provider,
+                    rateOfPayment: result.rateOfPayment,
+                    price: result.price,
+                    serviceImg: result.serviceImg,
                     _id: result._id,
-                    request: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/service/' + result._id
-                    }
                 }
             })
         })
@@ -391,12 +413,20 @@ exports.update_a_service = (req, res, next) => {
         updateOps["title"] = req.body.title;
     }
 
-    // if(req.body.category){
-    //     updateOps["category"] = req.body.category;
-    // }
+    if(req.body.category){
+        updateOps["category"] = req.body.category;
+    }
 
     if(req.body.description){
         updateOps["description"] = req.body.description;
+    }
+
+    if(req.body.rop){
+        updateOps["rateOfPayment"] = req.body.rop;
+    }
+
+    if(req.body.price){
+        updateOps["price"] = req.body.price;
     }
 
     // service image
@@ -406,14 +436,27 @@ exports.update_a_service = (req, res, next) => {
         }
     }
 
-    Service.updateOne({_id:id}, {$set: updateOps})
+    Service.findByIdAndUpdate({_id:id}, {$set: updateOps})
         .exec()
-        .then(result => {
+        .then(doc => {
             res.status(200).json({
                 message: "service_updated",
-                request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/products/' + id
+                service: {
+                    service: {
+                        title: doc.title,
+                        serviceImg: doc.serviceImg,
+                        description: doc.description,
+                        rateOfPayment: doc.rateOfPayment,
+                        price: doc.price,
+                        category: doc.category,
+                        _id: doc._id
+                    },
+                    seller: {
+                        _id: doc.provider._id,
+                        name: doc.provider.username,
+                        proPic: doc.provider.proPic,
+                        rating: 3,
+                    },
                 }
             });
         })
