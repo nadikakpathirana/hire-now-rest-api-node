@@ -8,12 +8,17 @@ const User = require("../models/user");
 
 
 exports.get_all_services = (req, res, next) => {
-    Service.find().populate('provider')
+    const page = parseInt(req.params.page) || 1; // current page number
+    const limit = 15; // number of items to return per page
+    const skip = (page - 1) * limit; // number of items to skip from the beginning
+    Service.find().skip(skip).limit(limit).populate('provider')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
                 const response = {
                     count: docs.length,
+                    page: page,
+                    limit: limit,
                     services: docs.map( doc => {
                         return {
                             _id: doc._id,

@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 // get all services
-router.get('/', ServiceController.get_all_services);
+router.get('/:page', ServiceController.get_all_services);
 
 // get all services
 router.get('/search/:searchKey', ServiceController.search_services);
