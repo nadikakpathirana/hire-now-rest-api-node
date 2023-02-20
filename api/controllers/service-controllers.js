@@ -149,6 +149,40 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
 }
 
 exports.get_suggested_services = (req, res, next) => {
+    Service.find().populate('provider')
+        .exec()
+        .then(docs => {
+            if (docs.length > 0) {
+                docs = utils.getMultipleRandom(docs, 12)
+                const response = {
+                    count: docs.length,
+                    services: docs.map( doc => {
+                        return {
+                            _id: doc._id,
+                            title: doc.title,
+                            serviceImg: doc.serviceImg,
+                            description: doc.description,
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rating: 3,
+                        }
+                    })
+                }
+                res.status(200).json(response);
+            } else {
+                res.status(404).json({error: 'service_empty'});
+            }
+
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            })
+        })
+}
+
+exports.get_suggested_services_with_id = (req, res, next) => {
     const id = req.params.userID;
     User.findById(id)
         .exec()

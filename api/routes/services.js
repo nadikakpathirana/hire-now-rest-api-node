@@ -51,8 +51,11 @@ router.get('/category/:categoryID', ServiceController.get_all_services_of_a_cate
 // get all services of a seller
 router.get('/seller-services/:sellerID', ServiceController.get_all_services_of_a_seller);
 
-// get suggested services
-router.get('/suggested/:userID', ServiceController.get_suggested_services);
+// get suggested services for anonymous users
+router.get('/suggested', ServiceController.get_suggested_services);
+
+// get suggested services for loges users
+router.get('/suggested/:userID', ServiceController.get_suggested_services_with_id);
 
 // get suggested services
 router.get('/popular', ServiceController.get_popular_services);
