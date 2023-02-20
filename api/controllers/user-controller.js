@@ -226,9 +226,6 @@ exports.email_verify = (req, res, next) => {
             User.updateOne({_id:id}, {$set: {isEmailVerified: true}})
                 .exec()
                 .then(result => {
-                    console.log("Email Verified.")
-                    console.log("result.isEmailVerified ", result.isEmailVerified)
-
                     if (result.matchedCount === 1){
                         User.findOne({_id:id})
                             .exec()
