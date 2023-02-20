@@ -61,7 +61,7 @@ router.get('/suggested/:userID', ServiceController.get_suggested_services_with_i
 router.get('/popular', ServiceController.get_popular_services);
 
 // get a specific service
-router.get('/:serviceID', ServiceController.get_specific_service);
+router.get('/specific/:serviceID', ServiceController.get_specific_service);
 
 // create a service
 router.post('/', upload.single('serviceImg'),  ServiceController.create_a_service);
