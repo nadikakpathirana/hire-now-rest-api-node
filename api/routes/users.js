@@ -47,6 +47,11 @@ router.get('/sellers', UserController.get_sellers);
 // register a user
 router.post('/signup', UserController.register_new_user);
 
+// register a user
+router.get('/email-verify/:userID/:token', UserController.email_verify);
+
+
+
 // user login
 router.post('/get-token', UserController.get_user_token);
 

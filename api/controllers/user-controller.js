@@ -2,15 +2,29 @@ const User = require('../models/user');
 const bcript = require("bcrypt");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
 
 const Service = require('../models/service');
+const e = require("express");
 
 function calculate_age(dob) {
-    var diff_ms = Date.now() - dob.getTime();
-    var age_dt = new Date(diff_ms);
+    try {
+        var diff_ms = Date.now() - dob.getTime();
+        var age_dt = new Date(diff_ms);
+        return Math.abs(age_dt.getUTCFullYear() - 1970);
+    } catch (e) {
+        return 24
+    }
 
-    return Math.abs(age_dt.getUTCFullYear() - 1970);
 }
+
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: "fromhirenow@gmail.com",
+        pass: "urtdgsrqzbvifqsx",
+    },
+});
 
 exports.get_all_users = (req, res, next) => {
     User.find()
@@ -29,7 +43,7 @@ exports.get_all_users = (req, res, next) => {
                             email: doc.email,
                             address: doc.address,
                             dob: doc.dob,
-                            // age: calculate_age(doc.dob),
+                            age: calculate_age(doc.dob),
                             proPic: doc.proPic,
                             password: doc.password,
                             phoneNumber: doc.phoneNumber,
@@ -143,16 +157,54 @@ exports.register_new_user = (req, res, next) => {
                         user
                             .save()
                             .then(result => {
-                                res.status(201).json({
-                                    message: "user created.",
-                                    user: {
-                                        username: result.username,
-                                        firstName: result.firstName,
-                                        lastName: result.lastName,
+                                const token = jwt.sign(
+                                    {
                                         email: result.email,
-                                        isSellerActivated: result.isSellerActivated
+                                        userId: result._id
+                                    },
+                                    process.env.JWT_KEY,
+                                    {
+                                        expiresIn: "3d"
                                     }
-                                })
+                                )
+
+                                // send verification email
+                                let mailOptions = {
+                                    from: "fromhirenow@gmail.com",
+                                    to: result.email,
+                                    subject: "Please Verify Your Email",
+                                    html: `<p>Click <a href=http://localhost:3000/users/email-verify/${result._id}/${token}>here</a> to verify your email address</p>`
+                                };
+
+                                transporter.sendMail(mailOptions, function(error, info) {
+                                    if (error) {
+                                        console.log(error);
+                                        res.status(201).json({
+                                            isEmailSent: true,
+                                            message: "user created.",
+                                            user: {
+                                                username: result.username,
+                                                firstName: result.firstName,
+                                                lastName: result.lastName,
+                                                email: result.email,
+                                                isSellerActivated: result.isSellerActivated
+                                            }
+                                        })
+                                    } else {
+                                        console.log("Verification email sent: " + info.response);
+                                        res.status(201).json({
+                                            isEmailSent: true,
+                                            message: "user created.",
+                                            user: {
+                                                username: result.username,
+                                                firstName: result.firstName,
+                                                lastName: result.lastName,
+                                                email: result.email,
+                                                isSellerActivated: result.isSellerActivated
+                                            }
+                                        })
+                                    }
+                                });
                             })
                             .catch( err => {
                                 console.log(err);
@@ -162,6 +214,65 @@ exports.register_new_user = (req, res, next) => {
                 })
             }
         })
+}
+
+exports.email_verify = (req, res, next) => {
+    const id = req.params.userID;
+    const token = req.params.token;
+
+    try {
+        const decode = jwt.verify(token, process.env.JWT_KEY);
+        if (decode){
+            User.updateOne({_id:id}, {$set: {isEmailVerified: true}})
+                .exec()
+                .then(result => {
+                    console.log("Email Verified.")
+                    console.log("result.isEmailVerified ", result.isEmailVerified)
+
+                    if (result.matchedCount === 1){
+                        User.findOne({_id:id})
+                            .exec()
+                            .then((doc) => {
+                                console.log(doc);
+                                res.status(200).json({
+                                    _id: doc.id,
+                                    status: true,
+                                    isEmailVerified: doc.isEmailVerified,
+                                    username:doc.username,
+                                    firstName: doc.firstName ,
+                                    lastName: doc.lastName,
+                                    email: doc.email,
+                                    address: doc.address,
+                                    dob: doc.dob,
+                                    age: calculate_age(doc.dob),
+                                    proPic: doc.proPic,
+                                    phoneNumber: doc.phoneNumber,
+                                    userType: doc.userType,
+                                    city: doc.location,
+                                    availability: doc.availability,
+                                    job: doc.job,
+                                    rating: 7,
+                                    about: doc.about || "default about text"
+                                });
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                res.status(500).json({status: false, error: err});
+                            })
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({status: false, error: err});
+                })
+
+        }
+
+    } catch (error) {
+        return res.status(200).json({
+            status: false
+        })
+    }
 }
 
 exports.get_user_token = (req, res, next) => {
@@ -227,7 +338,7 @@ exports.get_user_info = (req, res, next) => {
                     email: doc.email,
                     address: doc.address,
                     dob: doc.dob,
-                    // age: calculate_age(doc.dob),
+                    age: calculate_age(doc.dob),
                     proPic: doc.proPic,
                     phoneNumber: doc.phoneNumber,
                     userType: doc.userType,

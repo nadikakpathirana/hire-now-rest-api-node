@@ -16,7 +16,9 @@ const userSchema = mongoose.Schema({
     password: { type: String, required: true},
     phoneNumber: { type: String, required: false},
     userType: { type: String, default: "buyer", required: false},
-    isSellerActivated: {type: Boolean, default: false, required: false}
+    isSellerActivated: {type: Boolean, default: false, required: false},
+    isEmailVerified: {type: Boolean, default: false, required: false},
+
 })
 
 module.exports = mongoose.model('User', userSchema);
