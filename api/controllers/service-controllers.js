@@ -149,33 +149,100 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
 }
 
 exports.get_suggested_services = (req, res, next) => {
-    Service.find().populate('provider')
+    const id = req.params.userID;
+    User.findById(id)
         .exec()
-        .then(docs => {
-            if (docs.length > 0) {
-                docs = utils.getMultipleRandom(docs, 12)
-                const response = {
-                    count: docs.length,
-                    services: docs.map( doc => {
-                        return {
-                            _id: doc._id,
-                            title: doc.title,
-                            serviceImg: doc.serviceImg,
-                            description: doc.description,
-                            name: doc.provider.username,
-                            proPic: doc.provider.proPic,
-                            location: doc.provider.location,
-                            rating: 3,
-                        }
-                    })
-                }
-                res.status(200).json(response);
-            } else {
-                res.status(404).json({error: 'service_empty'});
-            }
+        .then((user) => {
+            const previous_search_keys = user.previous_search_keys || [];
+            const query = {
+                $or: [
+                    { keywords: { $in: previous_search_keys}},
+                    { category: {$in: previous_search_keys }}
+                ]
+            };
 
+            Service.find(query).populate('provider')
+                .exec()
+                .then(docs => {
+                    if (docs.length > 0) {
+
+                        // Calculate the relevance score for each service
+                        docs.forEach(service => {
+                            let relevance_score = 0;
+                            previous_search_keys.forEach(keyword => {
+                                if (service.keywords.includes(keyword)) {
+                                    relevance_score += 1;
+                                }
+                                if (service.category === keyword) {
+                                    relevance_score += 1;
+                                }
+                            });
+                            service.relevance_score = relevance_score;
+                        });
+
+                        const sorted_services = docs.sort((a, b) => b.relevance_score - a.relevance_score);
+
+
+                        const N = 12;
+                        const top_services = sorted_services.slice(0, N);
+
+                        const response = {
+                            count: top_services.length,
+                            services: top_services.map( doc => {
+                                return {
+                                    _id: doc._id,
+                                    title: doc.title,
+                                    serviceImg: doc.serviceImg,
+                                    description: doc.description,
+                                    name: doc.provider.username,
+                                    proPic: doc.provider.proPic,
+                                    location: doc.provider.location,
+                                    rating: 3,
+                                }
+                            })
+                        }
+                        res.status(200).json(response);
+                    } else {
+                        Service.find().populate('provider')
+                            .exec()
+                            .then(docs => {
+                                if (docs.length > 0) {
+                                    docs = utils.getMultipleRandom(docs, 12)
+                                    const response = {
+                                        services: docs.map( doc => {
+                                            return {
+                                                _id: doc._id,
+                                                title: doc.title,
+                                                serviceImg: doc.serviceImg,
+                                                description: doc.description,
+                                                name: doc.provider.username,
+                                                proPic: doc.provider.proPic,
+                                                location: doc.provider.location,
+                                                rating: 3,
+                                            }
+                                        })
+                                    }
+                                    res.status(200).json(response);
+                                } else {
+                                    res.status(404).json({error: 'service_empty'});
+                                }
+
+                            })
+                            .catch(err => {
+                                res.status(500).json({
+                                    error: err
+                                })
+                            })
+                    }
+
+                })
+                .catch(err => {
+                    res.status(500).json({
+                        error: err
+                    })
+                })
         })
-        .catch(err => {
+        .catch((err) => {
             res.status(500).json({
                 error: err
             })
@@ -183,7 +250,7 @@ exports.get_suggested_services = (req, res, next) => {
 }
 
 exports.get_popular_services = (req, res, next) => {
-    Service.find().populate('provider')
+    Service.find({isP: true}).populate('provider')
         .exec()
         .then(docs => {
             if (docs.length > 0) {

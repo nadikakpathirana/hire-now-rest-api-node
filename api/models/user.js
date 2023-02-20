@@ -18,6 +18,7 @@ const userSchema = mongoose.Schema({
     userType: { type: String, default: "buyer", required: false},
     isSellerActivated: {type: Boolean, default: false, required: false},
     isEmailVerified: {type: Boolean, default: false, required: false},
+    previous_search_keys: { type: Array, required: false},
 
 })
 

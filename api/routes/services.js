@@ -52,7 +52,7 @@ router.get('/category/:categoryID', ServiceController.get_all_services_of_a_cate
 router.get('/seller-services/:sellerID', ServiceController.get_all_services_of_a_seller);
 
 // get suggested services
-router.get('/suggested', ServiceController.get_suggested_services);
+router.get('/suggested/:userID', ServiceController.get_suggested_services);
 
 // get suggested services
 router.get('/popular', ServiceController.get_popular_services);
