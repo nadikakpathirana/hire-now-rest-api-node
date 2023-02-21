@@ -173,7 +173,7 @@ exports.register_new_user = (req, res, next) => {
                                     from: "fromhirenow@gmail.com",
                                     to: result.email,
                                     subject: "Please Verify Your Email",
-                                    html: `<p>Click <a href=http://localhost:3000/users/email-verify/${result._id}/${token}>here</a> to verify your email address</p>`
+                                    html: `<p>Click <a href=http://localhost:3000/emailverify/${result._id}/${token}>here</a> to verify your email address</p>`
                                 };
 
                                 transporter.sendMail(mailOptions, function(error, info) {
