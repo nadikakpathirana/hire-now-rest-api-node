@@ -315,9 +315,10 @@ exports.get_user_token = (req, res, next) => {
                             city: user[0].city,
                             availability: user[0].availability,
                             job: user[0].job,
-                            rating: user[0].rating,
+                            rating: 4,
                             about: user[0].about,
                             isSellerActivated: user[0].isSellerActivated,
+                            isEmailVerified: user[0].isEmailVerified
                         }
                     })
                 } else {
