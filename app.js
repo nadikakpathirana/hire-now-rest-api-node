@@ -4,14 +4,15 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-const UserRouters = require('./api/routes/users');
-const CategoryRouters = require('./api/routes/category');
-const ServiceRouters = require('./api/routes/services');
-const OrderRoutes = require('./api/routes/orders');
-const MessageRoutes = require("./api/routes/message");
+const UserRouters = require('./api/routes/user-routes');
+const CategoryRouters = require('./api/routes/category-routes');
+const ServiceRouters = require('./api/routes/service-routes');
+const OrderRoutes = require('./api/routes/order-routes');
+const MessageRoutes = require("./api/routes/message-routes");
 const FavouriteRoutes = require("./api/routes/favourite-routes");
 const PackageRoutes = require("./api/routes/package-router");
 const GalleryRoutes = require("./api/routes/gallery-routes");
+const CartRoutes = require("./api/routes/cart-routes");
 
 app.use(morgan('dev'));
 app.use('/uploads', express.static('uploads'));
@@ -59,6 +60,7 @@ app.use('/api/messages', MessageRoutes);
 app.use('/api/favourites', FavouriteRoutes);
 app.use('/api/packages', PackageRoutes);
 app.use('/api/gallery', GalleryRoutes);
+app.use('/api/cart', CartRoutes);
 
 //default url
 app.use((req, res, next) => {
