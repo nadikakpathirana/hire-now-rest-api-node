@@ -88,7 +88,7 @@ exports.search_services = (req, res, next) => {
 
 exports.get_all_services_of_a_category = (req, res, next) => {
     const id = req.params.categoryID;
-    Service.find({category:id})
+    Service.find({category:id}).populate("provider")
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -96,12 +96,18 @@ exports.get_all_services_of_a_category = (req, res, next) => {
                     count: docs.length,
                     services: docs.map( doc => {
                         return {
-                            name: doc.name,
+                            _id: doc._id,
                             title: doc.title,
+                            serviceImg: doc.serviceImg,
                             description: doc.description,
-                            // category: doc.category,
                             provider: doc.provider,
-                            _id: doc._id
+                            name: doc.provider.username,
+                            proPic: doc.provider.proPic,
+                            location: doc.provider.location,
+                            rateOfPayment: doc.rateOfPayment,
+                            price: doc.price,
+                            category: doc.category,
+                            rating: 3,
                         }
                     })
                 }
@@ -120,7 +126,7 @@ exports.get_all_services_of_a_category = (req, res, next) => {
 
 exports.get_all_services_of_a_seller = (req, res, next) => {
     const id = req.params.sellerID;
-    User.findOne({username: id})
+    User.findOne({username: id}).populate("provider")
         .exec()
         .then(result => {
             if (result) {
@@ -133,9 +139,18 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
                                 count: docs.length,
                                 services: docs.map( doc => {
                                     return {
+                                        _id: doc._id,
                                         title: doc.title,
                                         serviceImg: doc.serviceImg,
-                                        _id: doc._id
+                                        description: doc.description,
+                                        provider: doc.provider,
+                                        name: doc.provider.username,
+                                        proPic: doc.provider.proPic,
+                                        location: doc.provider.location,
+                                        rateOfPayment: doc.rateOfPayment,
+                                        price: doc.price,
+                                        category: doc.category,
+                                        rating: 3,
                                     }
                                 })
                             }
@@ -441,29 +456,29 @@ exports.update_a_service = (req, res, next) => {
         }
     }
 
-    Service.updateOne({_id:id}, {$set: updateOps})
+    Service.findByIdAndUpdate({_id:id}, {$set: updateOps}, {new: true})
         .exec()
         .then(doc => {
             res.status(200).json({
                 message: "service_updated",
-                status: true
-                // service: {
-                //     service: {
-                //         title: doc.title,
-                //         serviceImg: doc.serviceImg,
-                //         description: doc.description,
-                //         rateOfPayment: doc.rateOfPayment,
-                //         price: doc.price,
-                //         category: doc.category,
-                //         _id: doc._id
-                //     },
-                //     seller: {
-                //         _id: doc.provider._id,
-                //         name: doc.provider.username,
-                //         proPic: doc.provider.proPic,
-                //         rating: 3,
-                //     },
-                // }
+                status: true,
+                service: {
+                    service: {
+                        title: doc.title,
+                        serviceImg: doc.serviceImg,
+                        description: doc.description,
+                        rateOfPayment: doc.rateOfPayment,
+                        price: doc.price,
+                        category: doc.category,
+                        _id: doc._id
+                    },
+                    seller: {
+                        _id: doc.provider._id,
+                        name: doc.provider.username,
+                        proPic: doc.provider.proPic,
+                        rating: 3,
+                    },
+                }
             });
         })
         .catch(err => {
