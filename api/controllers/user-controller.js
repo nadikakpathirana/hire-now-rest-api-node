@@ -302,11 +302,22 @@ exports.get_user_token = (req, res, next) => {
                         message: "Auth successful",
                         token: token,
                         user: {
+                            _id: user[0]._id,
                             username: user[0].username,
                             firstName: user[0].firstName,
                             lastName: user[0].lastName,
                             email: user[0].email,
-                            isSellerActivated: user[0].isSellerActivated
+                            address: user[0].address,
+                            dob: user[0].dob,
+                            age: calculate_age(user[0].age),
+                            proPic: user[0].proPic,
+                            phoneNumber: user[0].phoneNumber,
+                            city: user[0].city,
+                            availability: user[0].availability,
+                            job: user[0].job,
+                            rating: user[0].rating,
+                            about: user[0].about,
+                            isSellerActivated: user[0].isSellerActivated,
                         }
                     })
                 } else {
@@ -343,7 +354,8 @@ exports.get_user_info = (req, res, next) => {
                     availability: doc.availability,
                     job: doc.job,
                     rating: 7,
-                    about: doc.about
+                    about: doc.about,
+                    isSellerActivated: doc.isSellerActivated,
                 });
             } else {
                 res.status(200).json({message: 'not valid entry for that id'})
@@ -474,20 +486,6 @@ exports.remove_a_user = (req, res, next) => {
         .then(result => {
             res.status(200).json({
                 message: "User deleted",
-                request: {
-                    type: 'POST',
-                    url: 'http://localhost:3000/users/',
-                    body: {
-                        username: 'String',
-                        firstName: 'String',
-                        lastName: 'String',
-                        email: 'String',
-                        address: 'String',
-                        dob: 'String',
-                        password: 'String',
-                        phoneNumber: 'String'
-                    }
-                }
             });
         })
         .catch(err => {
