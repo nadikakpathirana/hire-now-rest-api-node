@@ -164,7 +164,7 @@ exports.register_new_user = (req, res, next) => {
                                     },
                                     process.env.JWT_KEY,
                                     {
-                                        expiresIn: "3d"
+                                        expiresIn: "21d"
                                     }
                                 )
 
@@ -217,8 +217,8 @@ exports.register_new_user = (req, res, next) => {
 }
 
 exports.email_verify = (req, res, next) => {
-    const id = req.params.userID;
-    const token = req.params.token;
+    const id = req.body.userID;
+    const token = req.body.token;
 
     try {
         const decode = jwt.verify(token, process.env.JWT_KEY);
@@ -247,6 +247,7 @@ exports.email_verify = (req, res, next) => {
                                     userType: doc.userType,
                                     city: doc.location,
                                     availability: doc.availability,
+                                    isSellerActivated: doc.isSellerActivated,
                                     job: doc.job,
                                     rating: 7,
                                     about: doc.about || "default about text"
