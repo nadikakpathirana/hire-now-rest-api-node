@@ -393,7 +393,8 @@ exports.check_is_valid_token = (req, res, next) => {
                     availability: doc.availability,
                     phoneNumber: doc.phoneNumber,
                     userType: doc.userType,
-                    isSellerActivated: doc.isSellerActivated
+                    isSellerActivated: doc.isSellerActivated,
+                    isEmailVerified: doc.isEmailVerified
                 });
             } else {
                 res.status(404).json({message: 'not valid entry for that id'})
