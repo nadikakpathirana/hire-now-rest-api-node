@@ -363,7 +363,27 @@ exports.get_specific_service = (req, res, next) => {
         .then(async doc => {
             if (doc) {
                 let reviews = await Review.find({"service": id}).populate('buyer');
-                reviews.forEach(console.dir);
+                let allServices = await Service.find({provider: doc.provider._id});
+                let allReviews = await Review.find();
+
+                let totSRatings = 0;
+                let totSValues = 0;
+                await reviews.forEach((review) => {
+                    totSRatings++;
+                    totSValues += review.rating;
+                })
+
+                let totRatings = 0;
+                let totValues = 0;
+                await allServices.forEach((service) => {
+                    allReviews.forEach((review) => {
+                        if (review.service.toString() === service._id.toString()){
+                            totRatings ++;
+                            totValues += review.rating
+                        }
+                    })
+                })
+
                 res.status(200).json({
                     service: {
                         service: {
@@ -373,13 +393,14 @@ exports.get_specific_service = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
+                            rating: Number(totSValues/totSRatings).toFixed(1),
                             _id: doc._id
                         },
                         seller: {
                             _id: doc.provider._id,
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
-                            rating: 3,
+                            rating: Number(totValues/totRatings).toFixed(1),
                         },
                         reviews: reviews.map((review) => {
                             return {
