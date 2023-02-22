@@ -58,7 +58,7 @@ router.get('/suggested', ServiceController.get_suggested_services);
 router.get('/suggested/:userID', ServiceController.get_suggested_services_with_id);
 
 // get suggested services
-router.get('/popular', ServiceController.get_popular_services);
+router.get('/popular/services', ServiceController.get_popular_services);
 
 // get a specific service
 router.get('/specific/:serviceID', ServiceController.get_specific_service);

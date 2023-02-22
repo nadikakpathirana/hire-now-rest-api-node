@@ -489,7 +489,7 @@ exports.get_popular_services = (req, res, next) => {
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'service_empty'});
+                res.status(404).json({status: false, error: 'service_empty'});
             }
         })
         .catch(err => {
