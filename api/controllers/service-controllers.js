@@ -13,13 +13,31 @@ exports.get_all_services = (req, res, next) => {
     const skip = (page - 1) * limit; // number of items to skip from the beginning
     Service.find().skip(skip).limit(limit).populate('provider')
         .exec()
-        .then(docs => {
+        .then(async docs => {
             if (docs.length > 0) {
+
+                for (const doc of docs) {
+                    let totSRatings = 0;
+                    let totSValues = 0;
+
+                    const allReviews = await Review.find();
+
+                    await allReviews.forEach((review) => {
+                        if (review.service.toString() === doc._id.toString()) {
+                            totSRatings++;
+                            totSValues += review.rating;
+                        }
+                    })
+                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    doc.rating = serviceRating;
+                }
+
                 const response = {
                     count: docs.length,
                     page: page,
                     limit: limit,
-                    services: docs.map( doc => {
+                    services: docs.map(doc => {
                         return {
                             _id: doc._id,
                             title: doc.title,
@@ -32,7 +50,7 @@ exports.get_all_services = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
-                            rating: 3,
+                            rating: doc.rating,
                         }
                     })
                 }
@@ -635,8 +653,7 @@ exports.update_a_service = (req, res, next) => {
                     seller: {
                         _id: doc.provider._id,
                         name: doc.provider.username,
-                        proPic: doc.provider.proPic,
-                        rating: 3,
+                        proPic: doc.provider.proPic
                     },
                 }
             });
