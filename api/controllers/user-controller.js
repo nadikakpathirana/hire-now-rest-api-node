@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 
 const Service = require('../models/service');
 const e = require("express");
+const Review = require("../models/review");
 
 function calculate_age(dob) {
     try {
@@ -338,27 +339,69 @@ exports.get_user_info = (req, res, next) => {
     const id = req.params.userID;
     User.findOne({username: id})
         .exec()
-        .then(doc => {
+        .then(async doc => {
             if (doc) {
-                res.status(200).json({
-                    _id: doc._id,
-                    username:doc.username,
-                    firstName: doc.firstName,
-                    lastName: doc.lastName,
-                    email: doc.email,
-                    address: doc.address,
-                    dob: doc.dob,
-                    age: calculate_age(doc.dob),
-                    proPic: doc.proPic,
-                    phoneNumber: doc.phoneNumber,
-                    userType: doc.userType,
-                    city: doc.location,
-                    availability: doc.availability,
-                    job: doc.job,
-                    rating: 7,
-                    about: doc.about,
-                    isSellerActivated: doc.isSellerActivated,
-                });
+                if (doc.userType == "seller") {
+                    let allServices = await Service.find({provider: doc.provider._id});
+                    let allReviews = await Review.find();
+
+                    let totRatings = 0;
+                    let totValues = 0;
+                    await allServices.forEach((service) => {
+                        allReviews.forEach((review) => {
+                            if (review.service.toString() === service._id.toString()){
+                                totRatings ++;
+                                totValues += review.rating
+                            }
+                        })
+                    })
+
+                    doc.ratingCount = totRatings
+                    doc.rating = !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totSValues/totSRatings).toFixed(1): 0;
+
+                    res.status(200).json({
+                        _id: doc._id,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        city: doc.location,
+                        availability: doc.availability,
+                        job: doc.job,
+                        rating: doc.rating,
+                        ratingCount: doc.ratingCount,
+                        about: doc.about,
+                        isSellerActivated: doc.isSellerActivated,
+                    });
+
+                } else {
+                    res.status(200).json({
+                        _id: doc._id,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        city: doc.location,
+                        availability: doc.availability,
+                        job: doc.job,
+                        rating: 7,
+                        about: doc.about,
+                        isSellerActivated: doc.isSellerActivated,
+                    });
+                }
+
             } else {
                 res.status(200).json({message: 'not valid entry for that id'})
             }
@@ -375,37 +418,80 @@ exports.check_is_valid_token = (req, res, next) => {
     User.find({email: id})
         // .select("name price _id")
         .exec()
-        .then(doc => {
+        .then(async doc => {
             if (doc) {
                 doc = doc[0]
-                res.status(200).json({
-                    _id: doc._id,
-                    status: true,
-                    username:doc.username,
-                    firstName: doc.firstName,
-                    lastName: doc.lastName,
-                    email: doc.email,
-                    address: doc.address,
-                    dob: doc.dob,
-                    proPic: doc.proPic,
-                    about: doc.about,
-                    job: doc.job,
-                    location: doc.location,
-                    availability: doc.availability,
-                    phoneNumber: doc.phoneNumber,
-                    userType: doc.userType,
-                    isSellerActivated: doc.isSellerActivated,
-                    isEmailVerified: doc.isEmailVerified
-                });
+
+                if (doc.userType == "seller") {
+                    let allServices = await Service.find({provider: doc.provider._id});
+                    let allReviews = await Review.find();
+
+                    let totRatings = 0;
+                    let totValues = 0;
+                    await allServices.forEach((service) => {
+                        allReviews.forEach((review) => {
+                            if (review.service.toString() === service._id.toString()) {
+                                totRatings++;
+                                totValues += review.rating
+                            }
+                        })
+                    })
+
+                    doc.ratingCount = totRatings
+                    doc.rating = !isNaN(Number(totValues / totRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    res.status(200).json({
+                        _id: doc._id,
+                        status: true,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        proPic: doc.proPic,
+                        about: doc.about,
+                        job: doc.job,
+                        location: doc.location,
+                        availability: doc.availability,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        isSellerActivated: doc.isSellerActivated,
+                        isEmailVerified: doc.isEmailVerified,
+                        rating: doc.rating,
+                        ratingCount: doc.ratingCount,
+                    });
+
+                } else {
+                    res.status(200).json({
+                        _id: doc._id,
+                        status: true,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        proPic: doc.proPic,
+                        about: doc.about,
+                        job: doc.job,
+                        location: doc.location,
+                        availability: doc.availability,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        isSellerActivated: doc.isSellerActivated,
+                        isEmailVerified: doc.isEmailVerified
+                    });
+                }
             } else {
-                res.status(404).json({message: 'not valid entry for that id'})
+                    res.status(404).json({message: 'not valid entry for that id'})
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({error:err})
-        })
-}
+                console.log(err);
+                res.status(500).json({error: err})
+            })
+        }
 
 exports.update_user_info = (req, res, next) => {
     const id = req.params.userID;
