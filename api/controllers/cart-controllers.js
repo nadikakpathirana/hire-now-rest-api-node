@@ -84,3 +84,17 @@ exports.remove_cart_item = (req, res, next) => {
             res.status(500).json({error: err});
         })
 }
+
+exports.remove_all_cart_item = (req, res, next) => {
+    const id = req.params.cartID;
+    Cart.deleteMany({buyer:id})
+        .exec()
+        .then(result => {
+            res.status(200).json({
+                message: "all_cart_deleted",
+            });
+        })
+        .catch(err => {
+            res.status(500).json({error: err});
+        })
+}
