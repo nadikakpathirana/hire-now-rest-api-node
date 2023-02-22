@@ -167,7 +167,7 @@ exports.register_new_user = (req, res, next) => {
                                         expiresIn: "21d"
                                     }
                                 )
-
+                                console.log("email send started")
                                 // send verification email
                                 let mailOptions = {
                                     from: "fromhirenow@gmail.com",
