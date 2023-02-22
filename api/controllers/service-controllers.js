@@ -54,11 +54,29 @@ exports.search_services = (req, res, next) => {
     const regexPattern = new RegExp(`^${searchKey}`, 'i');
     Service.find({title: regexPattern}).populate('provider')
         .exec()
-        .then(docs => {
+        .then(async docs => {
             if (docs.length > 0) {
+
+                for (const doc of docs) {
+                    let totSRatings = 0;
+                    let totSValues = 0;
+
+                    const allReviews = await Review.find();
+
+                    await allReviews.forEach((review) => {
+                        if (review.service.toString() === doc._id.toString()) {
+                            totSRatings++;
+                            totSValues += review.rating;
+                        }
+                    })
+                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    doc.rating = serviceRating;
+                }
+
                 const response = {
                     count: docs.length,
-                    services: docs.map( doc => {
+                    services: docs.map(doc => {
                         return {
                             _id: doc._id,
                             title: doc.title,
@@ -70,7 +88,7 @@ exports.search_services = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
-                            rating: 3,
+                            rating: doc.rating,
                         }
                     })
                 }
@@ -91,11 +109,29 @@ exports.get_all_services_of_a_category = (req, res, next) => {
     const id = req.params.categoryID;
     Service.find({category:id}).populate("provider")
         .exec()
-        .then(docs => {
+        .then(async docs => {
             if (docs.length > 0) {
+
+                for (const doc of docs) {
+                    let totSRatings = 0;
+                    let totSValues = 0;
+
+                    const allReviews = await Review.find();
+
+                    await allReviews.forEach((review) => {
+                        if (review.service.toString() === doc._id.toString()) {
+                            totSRatings++;
+                            totSValues += review.rating;
+                        }
+                    })
+                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    doc.rating = serviceRating;
+                }
+
                 const response = {
                     count: docs.length,
-                    services: docs.map( doc => {
+                    services: docs.map(doc => {
                         return {
                             _id: doc._id,
                             title: doc.title,
@@ -108,7 +144,7 @@ exports.get_all_services_of_a_category = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
-                            rating: 3,
+                            rating: doc.rating,
                         }
                     })
                 }
@@ -133,12 +169,30 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
             if (result) {
                 Service.find({provider: result._id}).populate("provider")
                     .exec()
-                    .then(docs => {
+                    .then(async docs => {
                         console.log(docs);
                         if (docs.length > 0) {
+
+                            for (const doc of docs) {
+                                let totSRatings = 0;
+                                let totSValues = 0;
+
+                                const allReviews = await Review.find();
+
+                                await allReviews.forEach((review) => {
+                                    if (review.service.toString() === doc._id.toString()) {
+                                        totSRatings++;
+                                        totSValues += review.rating;
+                                    }
+                                })
+                                const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                                doc.rating = serviceRating;
+                            }
+
                             const response = {
                                 count: docs.length,
-                                services: docs.map( doc => {
+                                services: docs.map(doc => {
                                     return {
                                         _id: doc._id,
                                         title: doc.title,
@@ -151,7 +205,7 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
                                         rateOfPayment: doc.rateOfPayment,
                                         price: doc.price,
                                         category: doc.category,
-                                        rating: 3,
+                                        rating: doc.rating,
                                     }
                                 })
                             }
@@ -178,8 +232,26 @@ exports.get_all_services_of_a_seller = (req, res, next) => {
 exports.get_suggested_services = (req, res, next) => {
     Service.find().populate('provider')
         .exec()
-        .then(docs => {
+        .then(async docs => {
             if (docs.length > 0) {
+
+                for (const doc of docs) {
+                    let totSRatings = 0;
+                    let totSValues = 0;
+
+                    const allReviews = await Review.find();
+
+                    await allReviews.forEach((review) => {
+                        if (review.service.toString() === doc._id.toString()) {
+                            totSRatings++;
+                            totSValues += review.rating;
+                        }
+                    })
+                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    doc.rating = serviceRating;
+                }
+
                 docs = utils.getMultipleRandom(docs, 12)
                 const response = {
                     count: docs.length,
@@ -196,7 +268,7 @@ exports.get_suggested_services = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
-                            rating: 3,
+                            rating: doc.rating,
                         }
                     })
                 }
@@ -228,8 +300,25 @@ exports.get_suggested_services_with_id = (req, res, next) => {
 
             Service.find(query).populate('provider')
                 .exec()
-                .then(docs => {
+                .then(async docs => {
                     if (docs.length > 0) {
+
+                        for (const doc of docs) {
+                            let totSRatings = 0;
+                            let totSValues = 0;
+
+                            const allReviews = await Review.find();
+
+                            await allReviews.forEach((review) => {
+                                if (review.service.toString() === doc._id.toString()) {
+                                    totSRatings++;
+                                    totSValues += review.rating;
+                                }
+                            })
+                            const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                            doc.rating = serviceRating;
+                        }
 
                         // Calculate the relevance score for each service
                         docs.forEach(service => {
@@ -253,7 +342,7 @@ exports.get_suggested_services_with_id = (req, res, next) => {
 
                         const response = {
                             count: top_services.length,
-                            services: top_services.map( doc => {
+                            services: top_services.map(doc => {
                                 return {
                                     _id: doc._id,
                                     title: doc.title,
@@ -265,7 +354,7 @@ exports.get_suggested_services_with_id = (req, res, next) => {
                                     rateOfPayment: doc.rateOfPayment,
                                     price: doc.price,
                                     category: doc.category,
-                                    rating: 3,
+                                    rating: doc.rating,
                                 }
                             })
                         }
@@ -273,11 +362,29 @@ exports.get_suggested_services_with_id = (req, res, next) => {
                     } else {
                         Service.find().populate('provider')
                             .exec()
-                            .then(docs => {
+                            .then(async docs => {
+
+                                for (const doc of docs) {
+                                    let totSRatings = 0;
+                                    let totSValues = 0;
+
+                                    const allReviews = await Review.find();
+
+                                    await allReviews.forEach((review) => {
+                                        if (review.service.toString() === doc._id.toString()) {
+                                            totSRatings++;
+                                            totSValues += review.rating;
+                                        }
+                                    })
+                                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                                    doc.rating = serviceRating;
+                                }
+
                                 if (docs.length > 0) {
                                     docs = utils.getMultipleRandom(docs, 12)
                                     const response = {
-                                        services: docs.map( doc => {
+                                        services: docs.map(doc => {
                                             return {
                                                 _id: doc._id,
                                                 title: doc.title,
@@ -289,7 +396,7 @@ exports.get_suggested_services_with_id = (req, res, next) => {
                                                 rateOfPayment: doc.rateOfPayment,
                                                 price: doc.price,
                                                 category: doc.category,
-                                                rating: 3,
+                                                rating: doc.rating,
                                             }
                                         })
                                     }
@@ -323,12 +430,30 @@ exports.get_suggested_services_with_id = (req, res, next) => {
 exports.get_popular_services = (req, res, next) => {
     Service.find({isP: true}).populate('provider')
         .exec()
-        .then(docs => {
+        .then(async docs => {
             if (docs.length > 0) {
+
+                for (const doc of docs) {
+                    let totSRatings = 0;
+                    let totSValues = 0;
+
+                    const allReviews = await Review.find();
+
+                    await allReviews.forEach((review) => {
+                        if (review.service.toString() === doc._id.toString()) {
+                            totSRatings++;
+                            totSValues += review.rating;
+                        }
+                    })
+                    const serviceRating = !isNaN(Number(totSValues / totSRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+
+                    doc.rating = serviceRating;
+                }
+
                 docs = utils.getMultipleRandom(docs, 12)
                 const response = {
                     count: docs.length,
-                    services: docs.map( doc => {
+                    services: docs.map(doc => {
                         return {
                             _id: doc._id,
                             title: doc.title,
@@ -340,7 +465,7 @@ exports.get_popular_services = (req, res, next) => {
                             rateOfPayment: doc.rateOfPayment,
                             price: doc.price,
                             category: doc.category,
-                            rating: 3,
+                            rating: doc.rating,
                         }
                     })
                 }
