@@ -5,7 +5,7 @@ const multer = require('multer');
 
 const utils = require('./utils');
 const User = require("../models/user");
-
+const Review = require("../models/review");
 
 exports.get_all_services = (req, res, next) => {
     const page = parseInt(req.params.page) || 1; // current page number
@@ -360,8 +360,10 @@ exports.get_specific_service = (req, res, next) => {
     const id = req.params.serviceID;
     Service.findById(id).populate('provider')
         .exec()
-        .then(doc => {
+        .then(async doc => {
             if (doc) {
+                let reviews = await Review.find({"service": id}).populate('buyer');
+                reviews.forEach(console.dir);
                 res.status(200).json({
                     service: {
                         service: {
@@ -379,6 +381,16 @@ exports.get_specific_service = (req, res, next) => {
                             proPic: doc.provider.proPic,
                             rating: 3,
                         },
+                        reviews: reviews.map((review) => {
+                            return {
+                                _id: review._id,
+                                name: review.buyer.username,
+                                proPic: review.buyer.proPic,
+                                rating: review.rating,
+                                review: review.review,
+                                date: new Date(review.timestamp).toDateString()
+                            }
+                        })
                     }
                 });
             } else {
