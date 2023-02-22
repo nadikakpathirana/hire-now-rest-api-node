@@ -68,7 +68,6 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
 
         })
         .catch(err => {
-            console.log(err, "error");
             res.status(500).json({
                 error: err
             })

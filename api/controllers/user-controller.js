@@ -231,7 +231,6 @@ exports.email_verify = (req, res, next) => {
                         User.findOne({_id:id})
                             .exec()
                             .then((doc) => {
-                                console.log(doc);
                                 res.status(200).json({
                                     _id: doc.id,
                                     status: true,

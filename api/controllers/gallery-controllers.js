@@ -24,7 +24,7 @@ exports.get_all_of_seller = (req, res, next) => {
                     count: 0,
                     images: []
                 }
-                console.log("gallery_empty");
+                // console.log("gallery_empty");
                 res.status(200).json(response);
             }
         })
@@ -36,7 +36,6 @@ exports.get_all_of_seller = (req, res, next) => {
 }
 
 exports.add_new_image = (req, res, next) => {
-    console.log("tesysafy");
     User.find({username: req.body.username})
         .exec()
         .then(doc => {
