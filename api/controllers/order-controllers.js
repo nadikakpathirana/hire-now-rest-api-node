@@ -15,6 +15,7 @@ exports.get_orders_of_a_seller = (req, res, next) => {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -50,6 +51,7 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -86,6 +88,7 @@ exports.get_active_orders_of_a_seller = (req, res, next) => {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -121,6 +124,7 @@ exports.get_completed_orders_of_a_seller = (req, res, next) => {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -157,6 +161,7 @@ exports.get_orders_of_a_buyer = (req, res, next) => {
                             proPic: doc.seller.proPic,
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -193,6 +198,7 @@ exports.get_pending_orders_of_a_buyer = (req, res, next) => {
                             proPic: doc.seller.proPic,
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -246,6 +252,7 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
                             proPic: doc.seller.proPic,
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -282,6 +289,7 @@ exports.get_completed_orders_of_a_buyer = (req, res, next) => {
                             proPic: doc.seller.proPic,
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
+                            service: doc.service._id,
                             title: doc.service.title,
                             about: doc.service.about,
                             price: doc.service.price,
@@ -313,6 +321,7 @@ exports.get_specific_order = (req, res, next) => {
                 res.status(200).json({
                     _id: doc._id,
                     serviceImg: doc.service.serviceImg,
+                    service: doc.service._id,
                     title: doc.service.title,
                     about: doc.service.about,
                     message: doc.message,
@@ -363,11 +372,7 @@ exports.patch_a_order = (req, res, next) => {
         .exec()
         .then(result => {
             res.status(200).json({
-                message: "order_updated",
-                request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/orders/' + id
-                }
+                message: "order_updated"
             });
         })
         .catch(err => {
@@ -381,17 +386,7 @@ exports.remove_a_order = (req, res, next) => {
         .exec()
         .then(result => {
             res.status(200).json({
-                message: "order_deleted",
-                request: {
-                    type: 'POST',
-                    url: 'http://localhost:3000/services/',
-                    body: {
-                        buyer: 'ObjectId',
-                        seller: 'ObjectId',
-                        service: 'ObjectId',
-                        status: 'ObjectId'
-                    }
-                }
+                message: "order_deleted"
             });
         })
         .catch(err => {
