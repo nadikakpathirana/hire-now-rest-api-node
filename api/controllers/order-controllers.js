@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 
 exports.get_orders_of_a_seller = (req, res, next) => {
     const sellerID = req.params.sellerID;
-    Order.find({"seller": sellerID})
+    Order.find({"seller": sellerID}).populate('service').populate('buyer')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -12,16 +12,15 @@ exports.get_orders_of_a_seller = (req, res, next) => {
                     count: docs.length,
                     orders: docs.map( doc => {
                         return {
-                            buyer: doc.buyer,
-                            seller: doc.seller,
-                            service: doc.service,
+                            name: doc.buyer.username,
+                            proPic: doc.buyer.proPic,
+                            serviceImg: doc.service.serviceImg,
+                            title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
-                            request: {
-                                type: 'GET',
-                                url: 'http://localhost:3000/orders/' + doc._id
-                            }
                         }
                     })
                 }
@@ -52,6 +51,8 @@ exports.get_pending_orders_of_a_seller = (req, res, next) => {
                             proPic: doc.buyer.proPic,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -84,9 +85,10 @@ exports.get_active_orders_of_a_seller = (req, res, next) => {
                         return {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
-                            seller: doc.seller,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -118,9 +120,10 @@ exports.get_completed_orders_of_a_seller = (req, res, next) => {
                         return {
                             name: doc.buyer.username,
                             proPic: doc.buyer.proPic,
-                            seller: doc.seller,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -155,6 +158,8 @@ exports.get_orders_of_a_buyer = (req, res, next) => {
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -189,6 +194,8 @@ exports.get_pending_orders_of_a_buyer = (req, res, next) => {
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -240,6 +247,8 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -274,6 +283,8 @@ exports.get_completed_orders_of_a_buyer = (req, res, next) => {
                             buyer: doc.buyer,
                             serviceImg: doc.service.serviceImg,
                             title: doc.service.title,
+                            about: doc.service.about,
+                            price: doc.service.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
@@ -295,16 +306,16 @@ exports.get_completed_orders_of_a_buyer = (req, res, next) => {
 
 exports.get_specific_order = (req, res, next) => {
     const id = req.params.orderID;
-    Order.findById(id)
+    Order.findById(id).populate('service')
         .exec()
         .then(doc => {
             if (doc) {
                 res.status(200).json({
-                    order: doc,
-                    request: {
-                        type: 'GET',
-                        url: 'http://localhost:3000/orders/' + doc._id
-                    }
+                    _id: doc._id,
+                    serviceImg: doc.service.serviceImg,
+                    title: doc.service.title,
+                    about: doc.service.about,
+                    message: doc.message,
                 });
             } else {
                 res.status(404).json({message: 'order_empty'})
