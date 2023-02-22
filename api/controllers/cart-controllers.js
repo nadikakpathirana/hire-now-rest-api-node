@@ -103,9 +103,9 @@ exports.remove_cart_item = (req, res, next) => {
 }
 
 exports.remove_all_cart_item = (req, res, next) => {
-    const ids = req.params.cartID;
+    const ids = req.body.cartIds;
     Cart.deleteMany({
-        buyer: {
+        _id: {
             $in: [ids]
         }
     })
