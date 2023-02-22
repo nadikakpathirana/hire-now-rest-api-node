@@ -33,7 +33,7 @@ exports.get_cart_items_of_a_buyer = (req, res, next) => {
                                     description: doc.service.description,
                                     rateOfPayment: doc.service.rateOfPayment,
                                     price: doc.service.price,
-                                    category: doc.service.category,
+                                    // category: doc.service.category,
                                     rating: 5
                                 },
                                 seller: {
