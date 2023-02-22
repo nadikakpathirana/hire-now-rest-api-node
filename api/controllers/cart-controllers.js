@@ -5,7 +5,7 @@ const Cart = require("../models/cart");
 // get cart list of a buyer
 exports.get_cart_items_of_a_buyer = (req, res, next) => {
     const buyerID = req.params.buyerID;
-    Cart.find({"buyerID": buyerID}).populate('service')
+    Cart.find({"buyerID": buyerID}).populate('service').populate('buyer')
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -14,14 +14,22 @@ exports.get_cart_items_of_a_buyer = (req, res, next) => {
                     cartItems: docs.map((doc) => {
                         return {
                             _id: doc._id,
-                            buyer: doc.buyer,
-                            title:doc.service.title,
-                            serviceImg:doc.service.serviceImg,
-                            description:doc.service.description,
-                            rateOfPayment:doc.service.rateOfPayment,
-                            price:doc.service.price,
-                            rating: 5
-
+                            service: {
+                                title: doc.service.title,
+                                serviceImg: doc.service.serviceImg,
+                                description: doc.service.description,
+                                rateOfPayment: doc.service.rateOfPayment,
+                                price: doc.service.price,
+                                category: doc.service.category,
+                                _id: doc.service._id,
+                                rating: 5
+                            },
+                            seller: {
+                                _id: doc.buyer._id,
+                                name: doc.buyer.username,
+                                proPic: doc.buyer.proPic,
+                                rating: 6,
+                            },
                         }
                     })
                 }
