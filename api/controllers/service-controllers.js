@@ -543,7 +543,7 @@ exports.get_specific_service = (req, res, next) => {
                             _id: doc.provider._id,
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
-                            rating: !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totSValues/totSRatings).toFixed(1): 0,
+                            rating: !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totValues/totRatings).toFixed(1): 0,
                         },
                         reviews: reviews.map((review) => {
                             return {
