@@ -26,6 +26,7 @@ exports.get_all_services = (req, res, next) => {
                             serviceImg: doc.serviceImg,
                             description: doc.description,
                             name: doc.provider.username,
+                            provider: doc.provider._id,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
                             rateOfPayment: doc.rateOfPayment,
@@ -126,11 +127,11 @@ exports.get_all_services_of_a_category = (req, res, next) => {
 
 exports.get_all_services_of_a_seller = (req, res, next) => {
     const id = req.params.sellerID;
-    User.findOne({username: id}).populate("provider")
+    User.findOne({username: id})
         .exec()
         .then(result => {
             if (result) {
-                Service.find({provider: result._id})
+                Service.find({provider: result._id}).populate("provider")
                     .exec()
                     .then(docs => {
                         console.log(docs);
@@ -188,6 +189,7 @@ exports.get_suggested_services = (req, res, next) => {
                             title: doc.title,
                             serviceImg: doc.serviceImg,
                             description: doc.description,
+                            provide: doc.provider,
                             name: doc.provider.username,
                             proPic: doc.provider.proPic,
                             location: doc.provider.location,
