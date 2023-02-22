@@ -15,6 +15,6 @@ router.post('/', CartController.add_new_cart_item);
 router.delete('/:cartID', CartController.remove_cart_item);
 
 // delete all cart
-router.delete('delete-all', CartController.remove_all_cart_item);
+router.delete('/delete/all/', CartController.remove_all_cart_item);
 
 module.exports = router;
