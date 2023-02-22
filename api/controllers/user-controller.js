@@ -436,7 +436,7 @@ exports.check_is_valid_token = (req, res, next) => {
                     })
 
                     doc.ratingCount = totRatings
-                    doc.rating = !isNaN(Number(totValues / totRatings).toFixed(1)) ? Number(totSValues / totSRatings).toFixed(1) : 0;
+                    doc.rating = !isNaN(Number(totValues / totRatings).toFixed(1)) ? Number(totValues / totRatings).toFixed(1) : 0;
 
                     res.status(200).json({
                         _id: doc._id,
