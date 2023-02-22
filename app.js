@@ -15,7 +15,7 @@ const GalleryRoutes = require("./api/routes/gallery-routes");
 const CartRoutes = require("./api/routes/cart-routes");
 
 app.use(morgan('dev'));
-app.use('/uploads', express.static('uploads'));
+app.use('/api/uploads', express.static('uploads'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
