@@ -341,7 +341,7 @@ exports.get_user_info = (req, res, next) => {
         .then(async doc => {
             if (doc) {
                 if (doc.userType == "seller") {
-                    let allServices = await Service.find({provider: doc.provider._id});
+                    let allServices = await Service.find({provider: doc._id});
                     let allReviews = await Review.find();
 
                     let totRatings = 0;
@@ -356,7 +356,7 @@ exports.get_user_info = (req, res, next) => {
                     })
 
                     doc.ratingCount = totRatings
-                    doc.rating = !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totSValues/totSRatings).toFixed(1): 0;
+                    doc.rating = !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totValues/totRatings).toFixed(1): 0;
 
                     res.status(200).json({
                         _id: doc._id,
@@ -420,9 +420,8 @@ exports.check_is_valid_token = (req, res, next) => {
         .then(async doc => {
             if (doc) {
                 doc = doc[0]
-
                 if (doc.userType == "seller") {
-                    let allServices = await Service.find({provider: doc.provider._id});
+                    let allServices = await Service.find({provider: doc._id});
                     let allReviews = await Review.find();
 
                     let totRatings = 0;
