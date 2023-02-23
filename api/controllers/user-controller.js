@@ -19,13 +19,24 @@ function calculate_age(dob) {
 
 }
 
+// let transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: "fromhirenow@gmail.com",
+//         pass: "urtdgsrqzbvifqsx",
+//     },
+// });
+
 let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // upgrade later with STARTTLS
     auth: {
         user: "fromhirenow@gmail.com",
         pass: "urtdgsrqzbvifqsx",
     },
 });
+
 //
 // var transporter = nodemailer.createTransport({
 //     host: "sandbox.smtp.mailtrap.io",
