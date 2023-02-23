@@ -206,35 +206,69 @@ exports.register_new_user = (req, res, next) => {
                                     html: `<p>Click <a href=http://localhost:3000/emailverify/${result._id}/${token}>here</a> to verify your email address</p>`
                                 };
 
-                                await transporter.sendMail(mailOptions, function (error, info) {
-                                    if (error) {
-                                        console.log(error);
-                                        res.status(201).json({
-                                            isEmailSent: true,
-                                            message: "user created.",
-                                            user: {
-                                                username: result.username,
-                                                firstName: result.firstName,
-                                                lastName: result.lastName,
-                                                email: result.email,
-                                                isSellerActivated: result.isSellerActivated
-                                            }
-                                        })
-                                    } else {
-                                        console.log("Verification email sent: " + info.response);
-                                        res.status(201).json({
-                                            isEmailSent: true,
-                                            message: "user created.",
-                                            user: {
-                                                username: result.username,
-                                                firstName: result.firstName,
-                                                lastName: result.lastName,
-                                                email: result.email,
-                                                isSellerActivated: result.isSellerActivated
-                                            }
-                                        })
-                                    }
+                                await new Promise((resolve, reject) => {
+                                    transporter.sendMail(mailOptions, (err, info) => {
+                                        if (err) {
+                                            console.error(err);
+                                            res.status(201).json({
+                                                isEmailSent: true,
+                                                message: "user created.",
+                                                user: {
+                                                    username: result.username,
+                                                    firstName: result.firstName,
+                                                    lastName: result.lastName,
+                                                    email: result.email,
+                                                    isSellerActivated: result.isSellerActivated
+                                                }
+                                            })
+                                            reject(err);
+                                        } else {
+                                            console.log("Verification email sent: " + info.response);
+                                            res.status(201).json({
+                                                isEmailSent: true,
+                                                message: "user created.",
+                                                user: {
+                                                    username: result.username,
+                                                    firstName: result.firstName,
+                                                    lastName: result.lastName,
+                                                    email: result.email,
+                                                    isSellerActivated: result.isSellerActivated
+                                                }
+                                            })
+                                            resolve(info);
+                                        }
+                                    });
                                 });
+
+                                // await transporter.sendMail(mailOptions, function (error, info) {
+                                //     if (error) {
+                                //         console.log(error);
+                                //         res.status(201).json({
+                                //             isEmailSent: true,
+                                //             message: "user created.",
+                                //             user: {
+                                //                 username: result.username,
+                                //                 firstName: result.firstName,
+                                //                 lastName: result.lastName,
+                                //                 email: result.email,
+                                //                 isSellerActivated: result.isSellerActivated
+                                //             }
+                                //         })
+                                //     } else {
+                                //         console.log("Verification email sent: " + info.response);
+                                //         res.status(201).json({
+                                //             isEmailSent: true,
+                                //             message: "user created.",
+                                //             user: {
+                                //                 username: result.username,
+                                //                 firstName: result.firstName,
+                                //                 lastName: result.lastName,
+                                //                 email: result.email,
+                                //                 isSellerActivated: result.isSellerActivated
+                                //             }
+                                //         })
+                                //     }
+                                // });
                             })
                             .catch( err => {
                                 console.log(err);
