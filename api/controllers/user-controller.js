@@ -181,7 +181,7 @@ exports.register_new_user = (req, res, next) => {
                                     if (error) {
                                         console.log(error);
                                         res.status(201).json({
-                                            isEmailSent: true,
+                                            isEmailSent: false,
                                             message: "user created.",
                                             user: {
                                                 username: result.username,
@@ -224,40 +224,22 @@ exports.email_verify = (req, res, next) => {
     try {
         const decode = jwt.verify(token, process.env.JWT_KEY);
         if (decode){
-            User.updateOne({_id:id}, {$set: {isEmailVerified: true}})
+            User.findByIdAndUpdate({_id:id}, {$set: {isEmailVerified: true}}, {new: true})
                 .exec()
                 .then(result => {
-                    if (result.matchedCount === 1){
-                        User.findOne({_id:id})
-                            .exec()
-                            .then((doc) => {
-                                res.status(200).json({
-                                    _id: doc.id,
-                                    status: true,
-                                    isEmailVerified: doc.isEmailVerified,
-                                    username:doc.username,
-                                    firstName: doc.firstName ,
-                                    lastName: doc.lastName,
-                                    email: doc.email,
-                                    address: doc.address,
-                                    dob: doc.dob,
-                                    age: calculate_age(doc.dob),
-                                    proPic: doc.proPic,
-                                    phoneNumber: doc.phoneNumber,
-                                    userType: doc.userType,
-                                    city: doc.location,
-                                    availability: doc.availability,
-                                    isSellerActivated: doc.isSellerActivated,
-                                    job: doc.job,
-                                    rating: 7,
-                                    about: doc.about
-                                });
-                            })
-                            .catch((err) => {
-                                console.log(err);
-                                res.status(500).json({status: false, error: err});
-                            })
-                    }
+                    res.status(200).json({
+                        _id: result.id,
+                        status: true,
+                        isEmailVerified: result.isEmailVerified,
+                        username:result.username,
+                        firstName: result.firstName ,
+                        lastName: result.lastName,
+                        email: result.email,
+                        address: result.address,
+                        userType: result.userType,
+                        availability: result.availability,
+                        isSellerActivated: result.isSellerActivated,
+                    });
                 })
                 .catch(err => {
                     console.log(err);
