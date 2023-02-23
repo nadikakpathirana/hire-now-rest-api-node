@@ -2,8 +2,30 @@ const User = require('../models/user');
 const bcript = require("bcrypt");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
+const nodemailer = require('nodemailer');
 
 const Service = require('../models/service');
+const e = require("express");
+const Review = require("../models/review");
+
+function calculate_age(dob) {
+    try {
+        var diff_ms = Date.now() - dob.getTime();
+        var age_dt = new Date(diff_ms);
+        return Math.abs(age_dt.getUTCFullYear() - 1970);
+    } catch (e) {
+        return 24
+    }
+
+}
+
+let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: "fromhirenow@gmail.com",
+        pass: "urtdgsrqzbvifqsx",
+    },
+});
 
 exports.get_all_users = (req, res, next) => {
     User.find()
@@ -22,16 +44,11 @@ exports.get_all_users = (req, res, next) => {
                             email: doc.email,
                             address: doc.address,
                             dob: doc.dob,
+                            age: calculate_age(doc.dob),
                             proPic: doc.proPic,
-                            country: doc.country,
                             password: doc.password,
                             phoneNumber: doc.phoneNumber,
                             userType: doc.userType,
-
-                            // request: {
-                            //     type: 'GET',
-                            //     url: 'http://localhost:3000/products/' + doc._id
-                            // }
                         }
                     })
                 }
@@ -67,8 +84,6 @@ exports.get_user_counts = (req, res, next) => {
                             .exec()
                             .then(docs => {
                                 count.services = docs.length;
-                                console.log(docs.length);
-                                console.log(count);
                                 res.status(200).json({status: count});
                             })
                     })
@@ -82,7 +97,7 @@ exports.get_user_counts = (req, res, next) => {
 }
 
 exports.get_sellers = (req, res, next) => {
-    User.find({userType: "buyer"})
+    User.find({userType: "seller"})
         .exec()
         .then(docs => {
             if (docs.length > 0) {
@@ -92,32 +107,38 @@ exports.get_sellers = (req, res, next) => {
                         return {
                             _id: doc._id,
                             username:doc.username,
-                            proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                            rating: 4,
-                            description: "descriptiondescriptiondescription vdescription description description"
+                            proPic:doc.proPic,
+                            about:doc.about,
+                            rating: 4.5,
                         }
                     })
                 }
                 res.status(200).json(response);
             } else {
-                res.status(404).json({error: 'user_empty'});
+                res.status(200).json({error: 'user_empty'});
             }
 
         })
         .catch(err => {
-            res.status(500).json({
+            console.log(err);
+                res.status(500).json({
                 error: err
             })
         });
 }
 
 exports.register_new_user = (req, res, next) => {
-    User.find({email: req.body.email})
+    User.find({
+        $or: [
+            {email: req.body.email},
+            {username: req.body.username}
+        ]
+    })
         .exec()
         .then(user => {
             if (user.length >= 1) {
-                return res.status(409).json({
-                    message: "Email already exists"
+                return res.status(200).json({
+                    status: false
                 })
             } else {
                 bcript.hash(req.body.password, 10, (err, hash) => {
@@ -137,16 +158,54 @@ exports.register_new_user = (req, res, next) => {
                         user
                             .save()
                             .then(result => {
-                                res.status(201).json({
-                                    message: "user created.",
-                                    user: {
-                                        username: result.username,
-                                        firstName: result.firstName,
-                                        lastName: result.lastName,
+                                const token = jwt.sign(
+                                    {
                                         email: result.email,
-                                        isSellerActivated: result.isSellerActivated
+                                        userId: result._id
+                                    },
+                                    process.env.JWT_KEY,
+                                    {
+                                        expiresIn: "21d"
                                     }
-                                })
+                                )
+                                console.log("email send started")
+                                // send verification email
+                                let mailOptions = {
+                                    from: "fromhirenow@gmail.com",
+                                    to: result.email,
+                                    subject: "Please Verify Your Email",
+                                    html: `<p>Click <a href=http://localhost:3000/emailverify/${result._id}/${token}>here</a> to verify your email address</p>`
+                                };
+
+                                transporter.sendMail(mailOptions, function(error, info) {
+                                    if (error) {
+                                        console.log(error);
+                                        res.status(201).json({
+                                            isEmailSent: true,
+                                            message: "user created.",
+                                            user: {
+                                                username: result.username,
+                                                firstName: result.firstName,
+                                                lastName: result.lastName,
+                                                email: result.email,
+                                                isSellerActivated: result.isSellerActivated
+                                            }
+                                        })
+                                    } else {
+                                        console.log("Verification email sent: " + info.response);
+                                        res.status(201).json({
+                                            isEmailSent: true,
+                                            message: "user created.",
+                                            user: {
+                                                username: result.username,
+                                                firstName: result.firstName,
+                                                lastName: result.lastName,
+                                                email: result.email,
+                                                isSellerActivated: result.isSellerActivated
+                                            }
+                                        })
+                                    }
+                                });
                             })
                             .catch( err => {
                                 console.log(err);
@@ -158,8 +217,64 @@ exports.register_new_user = (req, res, next) => {
         })
 }
 
+exports.email_verify = (req, res, next) => {
+    const id = req.body.userID;
+    const token = req.body.token;
+
+    try {
+        const decode = jwt.verify(token, process.env.JWT_KEY);
+        if (decode){
+            User.updateOne({_id:id}, {$set: {isEmailVerified: true}})
+                .exec()
+                .then(result => {
+                    if (result.matchedCount === 1){
+                        User.findOne({_id:id})
+                            .exec()
+                            .then((doc) => {
+                                res.status(200).json({
+                                    _id: doc.id,
+                                    status: true,
+                                    isEmailVerified: doc.isEmailVerified,
+                                    username:doc.username,
+                                    firstName: doc.firstName ,
+                                    lastName: doc.lastName,
+                                    email: doc.email,
+                                    address: doc.address,
+                                    dob: doc.dob,
+                                    age: calculate_age(doc.dob),
+                                    proPic: doc.proPic,
+                                    phoneNumber: doc.phoneNumber,
+                                    userType: doc.userType,
+                                    city: doc.location,
+                                    availability: doc.availability,
+                                    isSellerActivated: doc.isSellerActivated,
+                                    job: doc.job,
+                                    rating: 7,
+                                    about: doc.about || "default about text"
+                                });
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                res.status(500).json({status: false, error: err});
+                            })
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).json({status: false, error: err});
+                })
+
+        }
+
+    } catch (error) {
+        return res.status(200).json({
+            status: false
+        })
+    }
+}
+
 exports.get_user_token = (req, res, next) => {
-    User.find({email: req.body.email})
+    User.find({username: req.body.email})
         .exec()
         .then(user => {
             if (user.length < 1) {
@@ -188,11 +303,23 @@ exports.get_user_token = (req, res, next) => {
                         message: "Auth successful",
                         token: token,
                         user: {
+                            _id: user[0]._id,
                             username: user[0].username,
                             firstName: user[0].firstName,
                             lastName: user[0].lastName,
                             email: user[0].email,
-                            isSellerActivated: user[0].isSellerActivated
+                            address: user[0].address,
+                            dob: user[0].dob,
+                            age: calculate_age(user[0].age),
+                            proPic: user[0].proPic,
+                            phoneNumber: user[0].phoneNumber,
+                            city: user[0].city,
+                            availability: user[0].availability,
+                            job: user[0].job,
+                            rating: 4,
+                            about: user[0].about,
+                            isSellerActivated: user[0].isSellerActivated,
+                            isEmailVerified: user[0].isEmailVerified
                         }
                     })
                 } else {
@@ -209,31 +336,73 @@ exports.get_user_token = (req, res, next) => {
 
 exports.get_user_info = (req, res, next) => {
     const id = req.params.userID;
-    User.find({username: id})
-        // .select("name price _id")
+    User.findOne({username: id})
         .exec()
-        .then(doc => {
+        .then(async doc => {
             if (doc) {
-                doc = doc[0];
-                res.status(200).json({
-                    _id: doc._id,
-                    username:doc.username,
-                    firstName: doc.firstName,
-                    lastName: doc.lastName,
-                    email: doc.email,
-                    address: doc.address,
-                    dob: doc.dob,
-                    proPic: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdXrN5H9Es9LsjxqNrUFbuEXtdc6q1457prQ&usqp=CAU",
-                    phoneNumber: doc.phoneNumber,
-                    userType: doc.userType,
-                    city: "Nagaraya",
-                    availability: "Full time",
-                    job: "Any",
-                    rating: 7,
-                    about: "halidi auia adjgaoiygfahf audgfaufditpawefha uawfouaiflajdhfduiaf ewgoauwefaweouif wae9ufewufawuf "
-                });
+                if (doc.userType == "seller") {
+                    let allServices = await Service.find({provider: doc._id});
+                    let allReviews = await Review.find();
+
+                    let totRatings = 0;
+                    let totValues = 0;
+                    await allServices.forEach((service) => {
+                        allReviews.forEach((review) => {
+                            if (review.service.toString() === service._id.toString()){
+                                totRatings ++;
+                                totValues += review.rating
+                            }
+                        })
+                    })
+
+                    doc.ratingCount = totRatings
+                    doc.rating = !isNaN(Number(totValues/totRatings).toFixed(1)) ? Number(totValues/totRatings).toFixed(1): 0;
+
+                    res.status(200).json({
+                        _id: doc._id,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        city: doc.location,
+                        availability: doc.availability,
+                        job: doc.job,
+                        rating: doc.rating,
+                        ratingCount: doc.ratingCount,
+                        about: doc.about,
+                        isSellerActivated: doc.isSellerActivated,
+                    });
+
+                } else {
+                    res.status(200).json({
+                        _id: doc._id,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        city: doc.location,
+                        availability: doc.availability,
+                        job: doc.job,
+                        rating: 7,
+                        about: doc.about,
+                        isSellerActivated: doc.isSellerActivated,
+                    });
+                }
+
             } else {
-                res.status(404).json({message: 'not valid entry for that id'})
+                res.status(200).json({message: 'not valid entry for that id'})
             }
         })
         .catch(err => {
@@ -248,48 +417,149 @@ exports.check_is_valid_token = (req, res, next) => {
     User.find({email: id})
         // .select("name price _id")
         .exec()
-        .then(doc => {
+        .then(async doc => {
             if (doc) {
                 doc = doc[0]
-                res.status(200).json({
-                    _id: doc._id,
-                    username:doc.username,
-                    firstName: doc.firstName,
-                    lastName: doc.lastName,
-                    email: doc.email,
-                    address: doc.address,
-                    dob: doc.dob,
-                    country: doc.country,
-                    phoneNumber: doc.phoneNumber,
-                    userType: doc.userType,
-                    isSellerActivated: doc.isSellerActivated
-                });
+                if (doc.userType == "seller") {
+                    let allServices = await Service.find({provider: doc._id});
+                    let allReviews = await Review.find();
+
+                    let totRatings = 0;
+                    let totValues = 0;
+                    await allServices.forEach((service) => {
+                        allReviews.forEach((review) => {
+                            if (review.service.toString() === service._id.toString()) {
+                                totRatings++;
+                                totValues += review.rating
+                            }
+                        })
+                    })
+
+                    doc.ratingCount = totRatings
+                    doc.rating = !isNaN(Number(totValues / totRatings).toFixed(1)) ? Number(totValues / totRatings).toFixed(1) : 0;
+
+                    res.status(200).json({
+                        _id: doc._id,
+                        status: true,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        about: doc.about,
+                        job: doc.job,
+                        location: doc.location,
+                        availability: doc.availability,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        isSellerActivated: doc.isSellerActivated,
+                        isEmailVerified: doc.isEmailVerified,
+                        rating: doc.rating,
+                        ratingCount: doc.ratingCount,
+                    });
+
+                } else {
+                    res.status(200).json({
+                        _id: doc._id,
+                        status: true,
+                        username: doc.username,
+                        firstName: doc.firstName,
+                        lastName: doc.lastName,
+                        email: doc.email,
+                        address: doc.address,
+                        dob: doc.dob,
+                        age: calculate_age(doc.dob),
+                        proPic: doc.proPic,
+                        about: doc.about,
+                        job: doc.job,
+                        location: doc.location,
+                        availability: doc.availability,
+                        phoneNumber: doc.phoneNumber,
+                        userType: doc.userType,
+                        isSellerActivated: doc.isSellerActivated,
+                        isEmailVerified: doc.isEmailVerified
+                    });
+                }
             } else {
-                res.status(404).json({message: 'not valid entry for that id'})
+                    res.status(404).json({message: 'not valid entry for that id'})
             }
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).json({error:err})
-        })
-}
+                console.log(err);
+                res.status(500).json({error: err})
+            })
+        }
 
 exports.update_user_info = (req, res, next) => {
     const id = req.params.userID;
     const updateOps = {};
 
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
+    // normal user
+    if(req.body.firstName){
+        updateOps["firstName"] = req.body.firstName;
+    }
+    if(req.body.lastName){
+        updateOps["lastName"] = req.body.lastName;
+    }
+    if(req.body.mobileNumber){
+        updateOps["phoneNumber"] = req.body.mobileNumber;
+    }
+    if(req.body.address){
+        updateOps["address"] = req.body.address;
     }
 
-    User.update({_id:id}, {$set: updateOps})
+    // seller data
+    if(req.body.job){
+        updateOps["job"] = req.body.job;
+    }
+    if(req.body.dob){
+        updateOps["dob"] = req.body.dob;
+    }
+    if(req.body.location){
+        updateOps["location"] = req.body.location;
+    }
+    if(req.body.availability){
+        updateOps["availability"] = req.body.availability;
+    }
+    if(req.body.about){
+        updateOps["about"] = req.body.about;
+    }
+
+    // profile pic
+    if(req.file){
+        if(req.file.path){
+            updateOps["proPic"] = req.file.path;
+        }
+    }
+
+    if(req.body.isSellerActivated){
+        updateOps["isSellerActivated"] = req.body.isSellerActivated;
+    }
+
+    User.findByIdAndUpdate({_id:id}, {$set: updateOps}, {new:true})
         .exec()
         .then(result => {
             res.status(200).json({
                 message: "user updated",
-                request: {
-                    type: 'GET',
-                    url: 'http://localhost:3000/users/' + id
+                user: {
+                    _id: result._id,
+                    username:result.username,
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    email: result.email,
+                    address: result.address,
+                    dob: result.dob,
+                    proPic: result.proPic,
+                    about: result.about,
+                    job: result.job,
+                    location: result.location,
+                    availability: result.availability,
+                    phoneNumber: result.phoneNumber,
+                    userType: result.userType,
+                    isSellerActivated: result.isSellerActivated
                 }
             });
         })
@@ -305,21 +575,6 @@ exports.remove_a_user = (req, res, next) => {
         .then(result => {
             res.status(200).json({
                 message: "User deleted",
-                request: {
-                    type: 'POST',
-                    url: 'http://localhost:3000/users/',
-                    body: {
-                        username: 'String',
-                        firstName: 'String',
-                        lastName: 'String',
-                        email: 'String',
-                        address: 'String',
-                        dob: 'String',
-                        country: 'String',
-                        password: 'String',
-                        phoneNumber: 'String'
-                    }
-                }
             });
         })
         .catch(err => {

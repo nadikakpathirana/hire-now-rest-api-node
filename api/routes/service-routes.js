@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const fs = require('fs');
 
-const authUser = require("../middleware/auth-user")
+// const authUser = require("../middleware/auth-user")
 
 const ServiceController = require("../controllers/service-controllers");
 
@@ -12,8 +12,8 @@ const ServiceController = require("../controllers/service-controllers");
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        fs.mkdir('./uploads/images/users/',(err)=>{
-            cb(null, './uploads/images/users/');
+        fs.mkdir('./uploads/images/services/',(err)=>{
+            cb(null, './uploads/images/services/');
         });
     },
     filename: function(req, file, cb) {
@@ -32,32 +32,42 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
     storage: storage,
-    limits: {
-        fileSize: 1024 * 1024 * 5
-    },
+    // limits: {
+    //     fileSize: 1024 * 1024 * 5
+    // },
     fileFilter: fileFilter
 });
 
 // get all services
-router.get('/', ServiceController.get_all_services);
+router.get('/:page', ServiceController.get_all_services);
+
+// get all services
+router.get('/search/:searchKey', ServiceController.search_services);
+
+
+// get all services
+router.get('/category/:categoryID', ServiceController.get_all_services_of_a_category);
 
 // get all services of a seller
 router.get('/seller-services/:sellerID', ServiceController.get_all_services_of_a_seller);
 
-// get suggested services
+// get suggested services for anonymous users
 router.get('/suggested', ServiceController.get_suggested_services);
 
+// get suggested services for loges users
+router.get('/suggested/:userID', ServiceController.get_suggested_services_with_id);
+
 // get suggested services
-router.get('/popular', ServiceController.get_popular_services);
+router.get('/popular/services', ServiceController.get_popular_services);
 
 // get a specific service
-router.get('/:serviceID', ServiceController.get_specific_service);
+router.get('/specific/:serviceID', ServiceController.get_specific_service);
 
 // create a service
-router.post('/', authUser, upload.single('serviceImg'), ServiceController.create_a_service);
+router.post('/', upload.single('serviceImg'),  ServiceController.create_a_service);
 
 // update a service
-router.patch('/:serviceID', authUser, ServiceController.update_a_service);
+router.patch('/:serviceID', upload.single('serviceImg'), ServiceController.update_a_service);
 
 // remove a service
 router.delete('/:serviceID', ServiceController.remove_a_service);
