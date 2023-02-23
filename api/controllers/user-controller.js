@@ -26,6 +26,15 @@ let transporter = nodemailer.createTransport({
         pass: "urtdgsrqzbvifqsx",
     },
 });
+//
+// var transporter = nodemailer.createTransport({
+//     host: "sandbox.smtp.mailtrap.io",
+//     port: 2525,
+//     auth: {
+//         user: "6480bc3e6fa7c6",
+//         pass: "11b7689ae53005"
+//     }
+// });
 
 exports.get_all_users = (req, res, next) => {
     User.find()
@@ -157,7 +166,7 @@ exports.register_new_user = (req, res, next) => {
                         })
                         user
                             .save()
-                            .then(result => {
+                            .then(async result => {
                                 const token = jwt.sign(
                                     {
                                         email: result.email,
@@ -177,7 +186,7 @@ exports.register_new_user = (req, res, next) => {
                                     html: `<p>Click <a href=http://localhost:3000/emailverify/${result._id}/${token}>here</a> to verify your email address</p>`
                                 };
 
-                                transporter.sendMail(mailOptions, function(error, info) {
+                                await transporter.sendMail(mailOptions, function (error, info) {
                                     if (error) {
                                         console.log(error);
                                         res.status(201).json({
