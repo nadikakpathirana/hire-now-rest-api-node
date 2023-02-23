@@ -250,7 +250,7 @@ exports.email_verify = (req, res, next) => {
                                     isSellerActivated: doc.isSellerActivated,
                                     job: doc.job,
                                     rating: 7,
-                                    about: doc.about || "default about text"
+                                    about: doc.about
                                 });
                             })
                             .catch((err) => {
@@ -509,6 +509,9 @@ exports.update_user_info = (req, res, next) => {
     }
     if(req.body.address){
         updateOps["address"] = req.body.address;
+    }
+    if(req.body.userType){
+        updateOps["userType"] = req.body.userType;
     }
 
     // seller data
