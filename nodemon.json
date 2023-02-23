@@ -1,6 +1,8 @@
 {
   "env": {
     "MONGO_ATLAS_PW": "admin",
-    "JWT_KEY": "primary_key"
+    "JWT_KEY": "primary_key",
+    "user": "6480bc3e6fa7c6",
+    "pass": "11b7689ae53005"
   }
 }
