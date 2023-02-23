@@ -193,14 +193,22 @@ exports.register_new_user = (req, res, next) => {
                                 //     },
                                 // });
 
-                                var transporter = nodemailer.createTransport({
-                                    host: "sandbox.smtp.mailtrap.io",
-                                    port: 2525,
-                                    auth: {
-                                        user: "6480bc3e6fa7c6",
-                                        pass: "11b7689ae53005"
+                                // var transporter = nodemailer.createTransport({
+                                //     host: "sandbox.smtp.mailtrap.io",
+                                //     port: 2525,
+                                //     auth: {
+                                //         user: "6480bc3e6fa7c6",
+                                //         pass: "11b7689ae53005"
+                                //     }
+                                // });
+
+                                const transporter = nodemailer.createTransport({
+                                    service : "hotmail",
+                                    auth : {
+                                        user : "fromhirenow@gmail.com",
+                                        pass : "Hirenow@2023"
                                     }
-                                });
+                                })
 
                                 // verify connection configuration
                                 console.log("verify email options")
