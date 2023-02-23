@@ -183,14 +183,23 @@ exports.register_new_user = (req, res, next) => {
                                 )
 
                                 console.log("config email options");
-                                let transporter = nodemailer.createTransport({
-                                    host: "smtp.gmail.com",
-                                    port: 587,
-                                    secure: false, // upgrade later with STARTTLS
+                                // let transporter = nodemailer.createTransport({
+                                //     host: "smtp.gmail.com",
+                                //     port: 587,
+                                //     secure: false, // upgrade later with STARTTLS
+                                //     auth: {
+                                //         user: "fromhirenow@gmail.com",
+                                //         pass: "urtdgsrqzbvifqsx",
+                                //     },
+                                // });
+
+                                var transporter = nodemailer.createTransport({
+                                    host: "sandbox.smtp.mailtrap.io",
+                                    port: 2525,
                                     auth: {
-                                        user: "fromhirenow@gmail.com",
-                                        pass: "urtdgsrqzbvifqsx",
-                                    },
+                                        user: "6480bc3e6fa7c6",
+                                        pass: "11b7689ae53005"
+                                    }
                                 });
 
                                 // verify connection configuration
