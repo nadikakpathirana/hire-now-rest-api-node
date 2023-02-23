@@ -27,24 +27,8 @@ function calculate_age(dob) {
 //     },
 // });
 
-let transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false, // upgrade later with STARTTLS
-    auth: {
-        user: "fromhirenow@gmail.com",
-        pass: "urtdgsrqzbvifqsx",
-    },
-});
 
-// verify connection configuration
-transporter.verify(function (error, success) {
-    if (error) {
-        console.log(error);
-    } else {
-        console.log("Server is ready to take our messages");
-    }
-});
+
 
 //
 // var transporter = nodemailer.createTransport({
@@ -197,7 +181,29 @@ exports.register_new_user = (req, res, next) => {
                                         expiresIn: "21d"
                                     }
                                 )
-                                console.log("email send started")
+
+                                console.log("config email options");
+                                let transporter = nodemailer.createTransport({
+                                    host: "smtp.gmail.com",
+                                    port: 587,
+                                    secure: false, // upgrade later with STARTTLS
+                                    auth: {
+                                        user: "fromhirenow@gmail.com",
+                                        pass: "urtdgsrqzbvifqsx",
+                                    },
+                                });
+
+                                // verify connection configuration
+                                console.log("verify email options")
+                                transporter.verify(function (error, success) {
+                                    if (error) {
+                                        console.log(error);
+                                    } else {
+                                        console.log("Server is ready to take our messages");
+                                    }
+                                });
+
+                                console.log("email send started");
                                 // send verification email
                                 let mailOptions = {
                                     from: "fromhirenow@gmail.com",
