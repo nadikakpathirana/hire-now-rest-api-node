@@ -48,7 +48,7 @@ router.get('/sellers', UserController.get_sellers);
 router.post('/signup', UserController.register_new_user);
 
 // register a user
-router.get('/email-verify', UserController.email_verify);
+router.post('/email-verify', UserController.email_verify);
 
 
 

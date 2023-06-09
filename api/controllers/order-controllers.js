@@ -254,7 +254,7 @@ exports.get_active_orders_of_a_buyer = (req, res, next) => {
                             service: doc.service._id,
                             title: doc.service.title,
                             description: doc.service.description,
-                            price: doc.service.price,
+                            price: doc.price,
                             status: doc.status,
                             message: doc.message,
                             _id: doc._id,
